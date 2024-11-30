@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile</title>
+    <link rel="stylesheet" href="profile.css">
+</head>
+<body>
+    <div class="form-container">
+        <h1>Profile Settings</h1>
+        <div class="profile-picture">
+            <img id="profilePicture" src="default-profile.png" alt="Profile Picture">
+        </div>
+        <form action="profile.php" method="post" enctype="multipart/form-data">
+            <label for="name">Name:</label>
+            <input type="text" id="name" name="name" required>
+            
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" required>
+            
+            <label for="profile_picture">Profile Picture:</label>
+            <input type="file" id="profile_picture" name="profile_picture" accept="image/*">
+            <span id="file-name"></span>
+            
+            <input type="submit" value="Save Changes">
+        </form>
+        <button class="back-button" onclick="history.back()">Back</button>
+    </div>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            fetch('profile.php?action=get')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('name').value = data.name;
+                    document.getElementById('email').value = data.email;
+                    if (data.profile_picture) {
+                        document.getElementById('profilePicture').src = data.profile_picture;
+                    }
+                })
+                .catch(error => console.error('Error fetching profile data:', error));
+
+            document.getElementById('profile_picture').addEventListener('change', function(e) {
+                const fileName = e.target.files[0].name;
+                document.getElementById('file-name').textContent = fileName;
+
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('profilePicture').src = e.target.result;
+                }
+                reader.readAsDataURL(e.target.files[0]);
+            });
+        });
+    </script>
+</body>
+</html>

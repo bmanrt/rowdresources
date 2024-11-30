@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Media</title>
+    <link rel="stylesheet" href="view_media.css">
+</head>
+<body>
+    <div class="form-container">
+        <h1>Captured Media</h1>
+        <div class="media-container" id="mediaContainer">
+            <!-- Media items will be inserted here -->
+        </div>
+        <button class="back-button" onclick="history.back()">Back</button>
+    </div>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            fetch('fetch_media.php')
+                .then(response => response.json())
+                .then(data => {
+                    const mediaContainer = document.getElementById('mediaContainer');
+                    data.forEach(media => {
+                        const mediaItem = document.createElement('div');
+                        mediaItem.className = 'media-item';
+                        const mediaLink = document.createElement('a');
+                        mediaLink.href = media.path;
+                        mediaLink.download = media.path.split('/').pop();
+                        mediaLink.textContent = `Download ${media.type.charAt(0).toUpperCase() + media.type.slice(1)}`;
+                        mediaLink.className = 'media-link';
+                        mediaItem.appendChild(mediaLink);
+                        mediaContainer.appendChild(mediaItem);
+                    });
+                })
+                .catch(error => console.error('Error fetching media:', error));
+        });
+    </script>
+</body>
+</html>

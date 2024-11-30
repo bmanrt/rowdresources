@@ -1,0 +1,18 @@
+{
+    "tags": {
+        "Vehicles": ["Planes", "Buses", "Trains"],
+        "Transport Terminals": ["Airports", "Bus Terminals", "Train Terminals"],
+        "Homes": ["Apartment Blocks", "Detached Houses", "Residential Estates", "Neighbourhoods"],
+        "Communities": ["The inner cities", "The Hinterlands", "Communities in crisis"],
+        "Hospitals": ["Teaching Hospitals", "Clinics", "Paediatric Hospitals"],
+        "Farms & Markets": [],
+        "Public Spaces": ["Parks", "Malls", "Shops"],
+        "Hospitality Businesses": ["Hotels", "Restaurants", "Event Centres"],
+        "Public Buildings": ["Government offices", "Courthouses", "Police stations"],
+        "Offices": ["Companies", "Factories"],
+        "Dangerous Jobs": ["Mines", "Offshore Rigs"],
+        "Military Bases": [],
+        "Iconic Landmarks/Tourist Attractions": [],
+        "People With Special Needs": ["Prisons", "Orphanages"]
+    }
+}

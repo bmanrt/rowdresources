@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register</title>
+    <link rel="stylesheet" href="register.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+</head>
+<body>
+    <div class="form-container">
+        <h1>Create an Account</h1>
+        <p>Fill your details below or register with your KingsChat account</p>
+        <form action="register.php" method="post">
+            <div class="form-group">
+                <label for="reg-name">Name:</label>
+                <input type="text" id="reg-name" name="name" placeholder="Enter your full name" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="reg-email">Email:</label>
+                <input type="email" id="reg-email" name="email" placeholder="Enter your email address" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="reg-country">Country of Residence:</label>
+                <select id="reg-country" name="country" required>
+                    <option value="" disabled selected>Select your country</option>
+                    <!-- Options will be populated by JavaScript -->
+                </select>
+            </div>
+            
+            <div class="form-group password-container">
+                <label for="reg-password">Password:</label>
+                <input type="password" id="reg-password" name="password" placeholder="Enter your password" required>
+                <span class="password-toggle" onclick="togglePassword()"><i class="fas fa-eye"></i></span>
+            </div>
+            
+            <div class="form-group agree-text">
+                <label for="reg-agree">
+                    <input type="checkbox" id="reg-agree" name="agree" required>
+                    I agree to the Terms of Service.
+                </label>
+            </div>
+            
+            <input type="submit" value="Sign Up">
+        </form>
+        <p>Or sign up with</p>
+        <a href="https://auth.kingschat.com/oauth2/authorize?response_type=code&client_id=YOUR_CLIENT_ID&redirect_uri=http://localhost/user_capture/kingschat_callback.php&scope=openid%20profile%20email" class="kingschat-button">
+            <img src="kingschat.png" alt="KingsChat" width="24"> KingsChat
+        </a>
+        <div class="footer-text">
+            <p>Already have an account? <a href="login.html">Sign In</a></p>
+        </div>
+    </div>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            fetch('countries.php')
+                .then(response => response.json())
+                .then(countries => {
+                    const countrySelect = document.getElementById('reg-country');
+                    countries.forEach(country => {
+                        const option = document.createElement('option');
+                        option.value = country;
+                        option.text = country;
+                        countrySelect.appendChild(option);
+                    });
+                })
+                .catch(error => console.error('Error fetching country list:', error));
+        });
+
+        function togglePassword() {
+            const passwordField = document.getElementById('reg-password');
+            const passwordToggle = document.querySelector('.password-toggle i');
+            const type = passwordField.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordField.setAttribute('type', type);
+            passwordToggle.classList.toggle('fa-eye');
+            passwordToggle.classList.toggle('fa-eye-slash');
+        }
+    </script>
+</body>
+</html>

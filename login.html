@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <link rel="stylesheet" href="login.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+</head>
+<body>
+    <div class="form-container">
+        <h1>Welcome Back!</h1>
+        <p>Sign in to continue</p>
+        <form action="login.php" method="post">
+            <div class="form-group">
+                <label for="login-email">Email</label>
+                <input type="email" id="login-email" name="email" placeholder="Enter your email address" required>
+            </div>
+            <div class="form-group password-container">
+                <label for="login-password">Password</label>
+                <input type="password" id="login-password" name="password" placeholder="Enter your password" required>
+                <span class="password-toggle" onclick="togglePassword()"><i class="fas fa-eye"></i></span>
+            </div>
+            <input type="submit" value="Sign In">
+        </form>
+        <p><a href="forgot_password.html">Forgotten Password?</a></p>
+        <p>Or sign up with</p>
+        <a href="https://auth.kingschat.com/oauth2/authorize?response_type=code&client_id=YOUR_CLIENT_ID&redirect_uri=http://localhost/user_capture/kingschat_callback.php&scope=openid%20profile%20email" class="kingschat-button">
+            <img src="kingschat.png" alt="KingsChat" width="24"> KingsChat
+        </a>
+        <div class="footer-text">
+            <p>Don't have an account? <a href="register.html">Sign Up</a></p>
+        </div>
+    </div>
+    <script>
+        function togglePassword() {
+            const passwordField = document.getElementById('login-password');
+            const passwordToggle = document.querySelector('.password-toggle i');
+            const type = passwordField.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordField.setAttribute('type', type);
+            passwordToggle.classList.toggle('fa-eye');
+            passwordToggle.classList.toggle('fa-eye-slash');
+        }
+    </script>
+</body>
+</html>

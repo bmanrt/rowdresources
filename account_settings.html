@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Account Settings</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .link-button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #ffcc00;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+        }
+        .link-button:hover {
+            background-color: #e6b800;
+        }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <h1>Account Settings</h1>
+        <!-- Other account settings options -->
+        <div class="settings-option">
+            <h2>Link Instagram Account</h2>
+            <button class="link-button" onclick="linkInstagram()">Link Instagram</button>
+        </div>
+        <div class="settings-option">
+            <h2>Link Facebook Account</h2>
+            <button class="link-button" onclick="linkFacebook()">Link Facebook</button>
+        </div>
+        <div class="settings-option">
+            <h2>Link Twitter Account</h2>
+            <button class="link-button" onclick="linkTwitter()">Link Twitter</button>
+        </div>
+        <button class="back-button" onclick="history.back()">Back</button>
+    </div>
+    <script>
+        function linkTwitter() {
+            fetch('twitter_request_token.php')
+                .then(response => response.json())
+                .then(data => {
+                    const twitterAuthUrl = `https://api.twitter.com/oauth/authenticate?oauth_token=${data.oauth_token}`;
+                    window.location.href = twitterAuthUrl;
+                })
+                .catch(error => console.error('Error:', error));
+        }
+    </script>
+</body>
+</html>

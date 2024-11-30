@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Authenticate 2FA</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="form-container">
+        <h1>Two-Factor Authentication</h1>
+        <form action="authenticate_2fa.php" method="post">
+            <label for="2fa-code">Enter the code sent to your email:</label>
+            <input type="text" id="2fa-code" name="code" required><br><br>
+            <input type="submit" value="Authenticate">
+        </form>
+        <a href="login.html">Back to Login</a>
+    </div>
+</body>
+</html>

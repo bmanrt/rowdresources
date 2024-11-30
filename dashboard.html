@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Media Capture Dashboard</title>
+    <link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <div class="header">
+            <div class="user-info">
+                <h2 id="welcome-message">Welcome</h2>
+                <p id="location">Location</p>
+            </div>
+            <a href="profile.html">
+                <img id="profile-picture" src="profile.jpg" alt="User Profile">
+            </a>
+        </div>
+        <div class="menu">
+            <div class="menu-item main-feature">
+                <a href="media_capture.html">
+                    <img src="media-capture-icon.png" alt="Media Capture">
+                    <p>Media Capture</p>
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="navigation">
+        <div class="nav-item">
+            <a href="dashboard.html"><img src="home.png" alt="Home"></a>
+        </div>
+        <div class="nav-item">
+            <a href="settings.html"><img src="setting.png" alt="Settings"></a>
+        </div>
+    </div>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            fetch('dashboard.php')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('welcome-message').textContent = 'Welcome ' + data.name;
+                    document.getElementById('location').textContent = data.country;
+                    if (data.profile_picture) {
+                        document.getElementById('profile-picture').src = data.profile_picture;
+                    }
+                })
+                .catch(error => console.error('Error fetching user data:', error));
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Media Capture</title>
+    <link rel="stylesheet" href="media_capture.css">
+</head>
+<body>
+    <div class="form-container">
+        <h1>Video Capture</h1>
+        <div class="media-container">
+            <div class="media-buttons">
+                <button onclick="captureVideo()">Capture Video</button>
+            </div>
+            <form id="mediaForm" action="media_capture.php" method="post" enctype="multipart/form-data">
+                <input type="file" id="mediaInput" name="media" accept="video/*" style="display:none">
+                <div class="media-preview">
+                    <video id="videoPreview" controls style="display:none"></video>
+                </div>
+            </form>
+            <button class="view-media-button" onclick="window.location.href='view_media.html'">View Captured Media</button>
+            <button class="back-button" onclick="window.location.href='dashboard.html'">Back to Dashboard</button>
+            <button class="back-button" onclick="history.back()">Back</button>
+        </div>
+    </div>
+    <script>
+        function captureVideo() {
+            const mediaInput = document.getElementById('mediaInput');
+            mediaInput.accept = 'video/*';
+            mediaInput.capture = 'environment';
+            mediaInput.click();
+            mediaInput.onchange = (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    const videoPreview = document.getElementById('videoPreview');
+                    videoPreview.style.display = 'block';
+                    videoPreview.src = URL.createObjectURL(file);
+                    document.getElementById('mediaForm').submit();
+                }
+            };
+        }
+    </script>
+</body>
+</html>

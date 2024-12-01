@@ -101,10 +101,16 @@ function initializeVideoPlayer() {
                             <span class="category"><i class="fas fa-folder"></i></span>
                             <span class="date"><i class="fas fa-calendar"></i></span>
                         </div>
-                        <a href="#" class="download-btn" download>
-                            <i class="fas fa-download"></i>
-                            <span>Download</span>
-                        </a>
+                        <div class="modal-actions">
+                            <a href="#" class="open-player-btn" title="Open in Player">
+                                <i class="fas fa-external-link-alt"></i>
+                                <span>Open in Player</span>
+                            </a>
+                            <a href="#" class="download-btn" download>
+                                <i class="fas fa-download"></i>
+                                <span>Download</span>
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -185,6 +191,26 @@ function initializeVideoPlayer() {
                 .download-btn:hover {
                     background: var(--primary-dark);
                 }
+                .modal-actions {
+                    display: flex;
+                    gap: 1rem;
+                    align-items: center;
+                }
+                .open-player-btn {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 0.5rem;
+                    padding: 0.5rem 1rem;
+                    background: var(--secondary-color);
+                    color: white;
+                    border-radius: 4px;
+                    text-decoration: none;
+                    font-weight: 500;
+                    transition: background 0.3s;
+                }
+                .open-player-btn:hover {
+                    background: var(--secondary-dark);
+                }
                 .plyr--video {
                     aspect-ratio: 16/9;
                 }
@@ -236,15 +262,21 @@ function openVideoModal(videoPath, description, category, date) {
     const player = document.getElementById('player');
     const source = player.querySelector('source');
     const downloadBtn = modal.querySelector('.download-btn');
+    const openPlayerBtn = modal.querySelector('.open-player-btn');
     
     // Update modal content
     modal.querySelector('.video-title').textContent = description;
     modal.querySelector('.category').innerHTML = `<i class="fas fa-folder"></i>${category}`;
     modal.querySelector('.date').innerHTML = `<i class="fas fa-calendar"></i>${date}`;
     
-    // Update video source and download link
-    source.src = videoPath;
-    downloadBtn.href = videoPath;
+    // Format paths for display and player
+    const displayPath = videoPath.startsWith('/') ? videoPath : '/' + videoPath;
+    const dbPath = displayPath.replace('/rowd/', '').replace(/^\//, '');
+    
+    // Update video source and action links
+    source.src = displayPath;
+    downloadBtn.href = displayPath;
+    openPlayerBtn.href = `player.php?video=${encodeURIComponent(dbPath)}`;
     
     // Initialize or update Plyr
     if (!window.videoPlayer) {

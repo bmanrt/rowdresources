@@ -32,6 +32,56 @@ if ($categoriesResult) {
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css" />
+    <style>
+        .upload-btn-widget {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            width: 60px;
+            height: 60px;
+            background: var(--primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+            z-index: 1000;
+            border: none;
+            text-decoration: none;
+        }
+
+        .upload-btn-widget:hover {
+            transform: translateY(-5px) scale(1.05);
+            background: var(--primary-dark);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+        }
+
+        .upload-btn-widget:active {
+            transform: translateY(-2px) scale(1.02);
+        }
+
+        .upload-btn-widget i {
+            transition: transform 0.3s ease;
+        }
+
+        .upload-btn-widget:hover i {
+            transform: rotate(90deg);
+        }
+
+        @media (max-width: 768px) {
+            .upload-btn-widget {
+                bottom: 1.5rem;
+                right: 1.5rem;
+                width: 50px;
+                height: 50px;
+                font-size: 1.25rem;
+            }
+        }
+    </style>
 </head>
 <body>
     <?php include('components/header.php'); ?>
@@ -110,6 +160,11 @@ if ($categoriesResult) {
             </div>
         </section>
     </template>
+
+    <!-- Upload Button Widget -->
+    <a href="upload.php" class="upload-btn-widget" title="Upload Video">
+        <i class="fas fa-plus"></i>
+    </a>
 
     <?php if (hasRole('admin')): ?>
     <!-- Admin Quick Actions -->

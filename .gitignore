@@ -38,3 +38,18 @@ yarn-error.log
 # Cache and session files
 /cache/
 /sessions/
+
+# Video and upload directories
+/app/uploads/
+/app/videos/
+*.mp4
+*.avi
+*.mov
+*.wmv
+*.flv
+*.mkv
+*.webm
+*.m4v
+*.mpg
+*.mpeg
+*.3gp

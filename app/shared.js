@@ -78,46 +78,228 @@ function formatFileSize(bytes) {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
 }
 
+// Initialize video player modal
+function initializeVideoPlayer() {
+    console.log('Initializing video player...');
+    // Create modal HTML if it doesn't exist
+    if (!document.getElementById('videoModal')) {
+        console.log('Creating video modal...');
+        const modalHTML = `
+            <div id="videoModal" class="video-modal">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3 class="video-title"></h3>
+                        <button class="close-modal">&times;</button>
+                    </div>
+                    <div class="modal-body">
+                        <video id="player" playsinline controls>
+                            <source type="video/mp4" />
+                        </video>
+                    </div>
+                    <div class="modal-footer">
+                        <div class="video-meta">
+                            <span class="category"><i class="fas fa-folder"></i></span>
+                            <span class="date"><i class="fas fa-calendar"></i></span>
+                        </div>
+                        <a href="#" class="download-btn" download>
+                            <i class="fas fa-download"></i>
+                            <span>Download</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        `;
+        document.body.insertAdjacentHTML('beforeend', modalHTML);
+
+        // Add modal styles if not already in stylesheet
+        if (!document.getElementById('modalStyles')) {
+            console.log('Adding modal styles...');
+            const modalStyles = `
+                .video-modal {
+                    display: none;
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    background: rgba(0, 0, 0, 0.9);
+                    z-index: 1000;
+                    opacity: 0;
+                    transition: opacity 0.3s ease;
+                }
+                .video-modal.show {
+                    display: flex !important;
+                    opacity: 1;
+                }
+                .modal-content {
+                    position: relative;
+                    width: 90%;
+                    max-width: 1200px;
+                    margin: auto;
+                    background: var(--card-bg);
+                    border-radius: 8px;
+                    overflow: hidden;
+                }
+                .modal-header {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    padding: 1rem;
+                    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+                }
+                .modal-body {
+                    position: relative;
+                    background: #000;
+                }
+                .modal-footer {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    padding: 1rem;
+                    border-top: 1px solid rgba(255, 255, 255, 0.1);
+                }
+                .close-modal {
+                    background: none;
+                    border: none;
+                    color: var(--text-color);
+                    font-size: 1.5rem;
+                    cursor: pointer;
+                    padding: 0.5rem;
+                    line-height: 1;
+                }
+                .close-modal:hover {
+                    color: var(--primary-color);
+                }
+                .download-btn {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 0.5rem;
+                    padding: 0.5rem 1rem;
+                    background: var(--primary-color);
+                    color: white;
+                    border-radius: 4px;
+                    text-decoration: none;
+                    font-weight: 500;
+                    transition: background 0.3s;
+                }
+                .download-btn:hover {
+                    background: var(--primary-dark);
+                }
+                .plyr--video {
+                    aspect-ratio: 16/9;
+                }
+            `;
+            const styleSheet = document.createElement('style');
+            styleSheet.id = 'modalStyles';
+            styleSheet.textContent = modalStyles;
+            document.head.appendChild(styleSheet);
+        }
+    }
+}
+
 // Create video card HTML helper
 function createVideoCard(video) {
-    const videoElement = document.createElement('video');
-    videoElement.controls = true;
-    videoElement.preload = 'metadata';
-    videoElement.style.width = '100%';
-    videoElement.style.maxHeight = '200px';
-    
     const videoPath = video.path.startsWith('http') ? 
         video.path : 
         (video.path.startsWith('/') ? video.path : '/' + video.path);
     
-    const source = document.createElement('source');
-    source.src = videoPath;
-    source.type = 'video/mp4';
-    videoElement.appendChild(source);
-    
-    const tagsHtml = video.tags && video.tags.length > 0 
-        ? `<span><i class="fas fa-tags"></i> ${video.tags.join(', ')}</span>` 
-        : '';
-    
-    const fileSize = video.size ? formatFileSize(video.size) : '';
-    const fileSizeHtml = fileSize ? `<span><i class="fas fa-file"></i> ${fileSize}</span>` : '';
-    
     return `
-        <div class="video-card">
+        <div class="video-card" onclick="openVideoModal('${encodeURIComponent(videoPath)}', '${encodeURIComponent(video.description || 'No description')}', '${encodeURIComponent(video.category || 'Uncategorized')}', '${encodeURIComponent(video.created_at)}')">
             <div class="video-thumbnail">
-                ${videoElement.outerHTML}
-                <div class="loading-spinner">
-                    <i class="fas fa-spinner fa-spin"></i>
-                </div>
+                <video src="${videoPath}" preload="metadata"></video>
             </div>
             <div class="video-info">
-                <h3 class="video-title">${video.description}</h3>
+                <h3 class="video-title">${video.description || 'No description'}</h3>
                 <div class="video-meta">
-                    <span><i class="fas fa-calendar"></i> ${video.created_at}</span>
-                    ${fileSizeHtml}
-                    ${tagsHtml}
+                    <span><i class="fas fa-folder"></i>${video.category || 'Uncategorized'}</span>
+                    <span><i class="fas fa-calendar"></i>${video.created_at}</span>
                 </div>
             </div>
         </div>
     `;
 }
+
+// Open video modal
+function openVideoModal(videoPath, description, category, date) {
+    console.log('Opening video modal...');
+    videoPath = decodeURIComponent(videoPath);
+    description = decodeURIComponent(description);
+    category = decodeURIComponent(category);
+    date = decodeURIComponent(date);
+
+    const modal = document.getElementById('videoModal');
+    if (!modal) {
+        console.error('Video modal not found! Initializing...');
+        initializeVideoPlayer();
+    }
+
+    const player = document.getElementById('player');
+    const source = player.querySelector('source');
+    const downloadBtn = modal.querySelector('.download-btn');
+    
+    // Update modal content
+    modal.querySelector('.video-title').textContent = description;
+    modal.querySelector('.category').innerHTML = `<i class="fas fa-folder"></i>${category}`;
+    modal.querySelector('.date').innerHTML = `<i class="fas fa-calendar"></i>${date}`;
+    
+    // Update video source and download link
+    source.src = videoPath;
+    downloadBtn.href = videoPath;
+    
+    // Initialize or update Plyr
+    if (!window.videoPlayer) {
+        console.log('Initializing Plyr...');
+        window.videoPlayer = new Plyr('#player', {
+            controls: [
+                'play-large', 'play', 'progress', 'current-time', 'duration',
+                'mute', 'volume', 'settings', 'pip', 'airplay', 'fullscreen',
+                'download'
+            ],
+            settings: ['quality', 'speed'],
+            speed: { selected: 1, options: [0.5, 0.75, 1, 1.25, 1.5, 2] }
+        });
+    } else {
+        player.load();
+    }
+    
+    // Show modal
+    modal.classList.add('show');
+    console.log('Modal should be visible now');
+    
+    // Close modal on background click or close button
+    const closeHandler = (e) => {
+        if (e.target === modal || e.target.classList.contains('close-modal')) {
+            closeVideoModal();
+        }
+    };
+    modal.removeEventListener('click', closeHandler);
+    modal.addEventListener('click', closeHandler);
+    
+    // Close on escape key
+    const escHandler = (e) => {
+        if (e.key === 'Escape') {
+            closeVideoModal();
+        }
+    };
+    document.removeEventListener('keydown', escHandler);
+    document.addEventListener('keydown', escHandler);
+}
+
+// Close video modal
+function closeVideoModal() {
+    console.log('Closing video modal...');
+    const modal = document.getElementById('videoModal');
+    if (window.videoPlayer) {
+        window.videoPlayer.pause();
+    }
+    modal.classList.remove('show');
+}
+
+// Initialize everything when DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('DOM loaded, initializing video player...');
+    initializeVideoPlayer();
+});
+
+// Also initialize when the script loads (in case DOMContentLoaded already fired)
+initializeVideoPlayer();

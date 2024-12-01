@@ -104,42 +104,20 @@ function formatFileSize(bytes) {
 
 // Create video card HTML
 function createVideoCard(video) {
-    const videoElement = document.createElement('video');
-    videoElement.controls = true;
-    videoElement.preload = 'metadata';
-    videoElement.style.width = '100%';
-    videoElement.style.maxHeight = '200px';
-    
     const videoPath = video.path.startsWith('http') ? 
         video.path : 
         (video.path.startsWith('/') ? video.path : '/' + video.path);
     
-    const source = document.createElement('source');
-    source.src = videoPath;
-    source.type = 'video/mp4';
-    videoElement.appendChild(source);
-    
-    const tagsHtml = video.tags && video.tags.length > 0 
-        ? `<span><i class="fas fa-tags"></i> ${video.tags.join(', ')}</span>` 
-        : '';
-    
-    const fileSize = video.size ? formatFileSize(video.size) : '';
-    const fileSizeHtml = fileSize ? `<span><i class="fas fa-file"></i> ${fileSize}</span>` : '';
-    
     return `
-        <div class="video-card">
+        <div class="video-card" onclick="openVideoModal('${encodeURIComponent(videoPath)}', '${encodeURIComponent(video.description || 'No description')}', '${encodeURIComponent(video.category || 'Uncategorized')}', '${encodeURIComponent(video.created_at)}')">
             <div class="video-thumbnail">
-                ${videoElement.outerHTML}
-                <div class="loading-spinner">
-                    <i class="fas fa-spinner fa-spin"></i>
-                </div>
+                <video src="${videoPath}" preload="metadata"></video>
             </div>
             <div class="video-info">
-                <h3 class="video-title">${video.description}</h3>
+                <h3 class="video-title">${video.description || 'No description'}</h3>
                 <div class="video-meta">
-                    <span><i class="fas fa-calendar"></i> ${video.created_at}</span>
-                    ${fileSizeHtml}
-                    ${tagsHtml}
+                    <span><i class="fas fa-folder"></i>${video.category || 'Uncategorized'}</span>
+                    <span><i class="fas fa-calendar"></i>${video.created_at}</span>
                 </div>
             </div>
         </div>
@@ -187,26 +165,30 @@ async function loadCategorySections() {
         const template = document.getElementById('categorySectionTemplate');
         if (!template) return;
         
+        // Clear existing sections first
+        categorySections.innerHTML = '';
+        
         if (!data.categories || data.categories.length === 0) {
             categorySections.innerHTML = '<p class="no-videos">No categories available</p>';
             return;
         }
         
         data.categories.forEach(category => {
-            const categoryId = `category_${category.name.toLowerCase().replace(/[^a-z0-9]+/g, '_')}`;
-            const section = template.innerHTML
-                .replace(/{category_name}/g, category.name)
-                .replace(/{category_url}/g, encodeURIComponent(category.name))
-                .replace(/{video_count}/g, category.video_count)
-                .replace(/{category_id}/g, categoryId);
-            
-            categorySections.insertAdjacentHTML('beforeend', section);
-            
-            const container = document.getElementById(categoryId);
-            if (container && category.videos && category.videos.length > 0) {
-                container.innerHTML = category.videos.map(video => createVideoCard(video)).join('');
-            } else if (container) {
-                container.innerHTML = '<p class="no-videos">No videos available in this category</p>';
+            // Only create section if there are videos
+            if (category.videos && category.videos.length > 0) {
+                const categoryId = `category_${category.name.toLowerCase().replace(/[^a-z0-9]+/g, '_')}`;
+                const section = template.innerHTML
+                    .replace(/{category_name}/g, category.name)
+                    .replace(/{category_url}/g, encodeURIComponent(category.name))
+                    .replace(/{video_count}/g, category.video_count)
+                    .replace(/{category_id}/g, categoryId);
+                
+                categorySections.insertAdjacentHTML('beforeend', section);
+                
+                const container = document.getElementById(categoryId);
+                if (container) {
+                    container.innerHTML = category.videos.map(video => createVideoCard(video)).join('');
+                }
             }
         });
         

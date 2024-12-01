@@ -34,6 +34,7 @@ if ($categoriesResult) {
     <link rel="stylesheet" href="styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css" />
 </head>
 <body>
     <?php include('components/header.php'); ?>
@@ -85,6 +86,7 @@ if ($categoriesResult) {
 
     <script src="script.js"></script>
     <script src="shared.js"></script>
+    <script src="https://cdn.plyr.io/3.7.8/plyr.polyfilled.js"></script>
     <script>
         async function searchVideos() {
             const searchTerm = document.getElementById('searchInput').value.trim();

@@ -6,15 +6,20 @@ require_once('../db_config.php');
 $action = isset($_GET['action']) ? $_GET['action'] : 'videos';
 
 if ($action === 'categories') {
-    // Load categories from JSON file
+    // Load all categories from JSON file for the header dropdown
     $categoriesJson = file_get_contents(__DIR__ . '/../data/categories.json');
     $categoriesData = json_decode($categoriesJson, true);
     
     if (json_last_error() === JSON_ERROR_NONE && isset($categoriesData['categories'])) {
-        echo json_encode(['categories' => $categoriesData['categories']]);
+        $categories = $categoriesData['categories'];
+        sort($categories); // Sort alphabetically
+        echo json_encode(['categories' => $categories]);
     } else {
         // Fallback to database if JSON fails
-        $sql = "SELECT DISTINCT category FROM user_media WHERE category IS NOT NULL AND category != '' ORDER BY category";
+        $sql = "SELECT DISTINCT category FROM user_media 
+                WHERE category IS NOT NULL 
+                AND category != '' 
+                ORDER BY category";
         $result = $conn->query($sql);
         
         $categories = [];
@@ -28,13 +33,18 @@ if ($action === 'categories') {
 }
 
 if ($action === 'categories_with_videos') {
-    // Load categories from JSON file
-    $categoriesJson = file_get_contents(__DIR__ . '/../data/categories.json');
-    $categoriesData = json_decode($categoriesJson, true);
-    $allCategories = isset($categoriesData['categories']) ? $categoriesData['categories'] : [];
+    // Get all categories that have videos from the database
+    $categoriesSql = "SELECT DISTINCT category FROM user_media 
+                      WHERE media_type = 'video' 
+                      AND category IS NOT NULL 
+                      AND category != '' 
+                      ORDER BY category";
+    $categoriesResult = $conn->query($categoriesSql);
     
     $categories = [];
-    foreach ($allCategories as $categoryName) {
+    while ($categoryRow = $categoriesResult->fetch_assoc()) {
+        $categoryName = $categoryRow['category'];
+        
         // Get video count for this category
         $countSql = "SELECT COUNT(*) as count FROM user_media WHERE media_type = 'video' AND category = ?";
         $stmt = $conn->prepare($countSql);

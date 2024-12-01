@@ -31,6 +31,7 @@ if ($categoriesResult) {
     <link rel="stylesheet" href="styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css" />
 </head>
 <body>
     <?php include('components/header.php'); ?>
@@ -61,7 +62,12 @@ if ($categoriesResult) {
     <section class="latest-videos">
         <div class="container">
             <div class="section-header">
-                <h2>Latest Videos</h2>
+                <div class="header-left">
+                    <h2>Latest Videos</h2>
+                    <button onclick="window.location.href='latest.php'" class="view-all-btn">
+                        View All <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
                 <div class="controls">
                     <button class="control-btn" data-section="latest" data-direction="prev">
                         <i class="fas fa-chevron-left"></i>
@@ -82,26 +88,22 @@ if ($categoriesResult) {
 
     <!-- Category Section Template -->
     <template id="categorySectionTemplate">
-        <section class="video-section">
+        <section class="latest-videos">
             <div class="container">
                 <div class="section-header">
-                    <div class="section-title-group">
+                    <div class="header-left">
                         <h2>{category_name}</h2>
-                        <span class="video-count">{video_count} videos</span>
+                        <button onclick="window.location.href='category.php?category={category_url}'" class="view-all-btn">
+                            View All <i class="fas fa-arrow-right"></i>
+                        </button>
                     </div>
-                    <div class="section-controls">
-                        <a href="category.php?category={category_url}" class="view-all-link">
-                            View All
-                            <i class="fas fa-arrow-right"></i>
-                        </a>
-                        <div class="controls">
-                            <button class="control-btn" data-section="{category_id}" data-direction="prev">
-                                <i class="fas fa-chevron-left"></i>
-                            </button>
-                            <button class="control-btn" data-section="{category_id}" data-direction="next">
-                                <i class="fas fa-chevron-right"></i>
-                            </button>
-                        </div>
+                    <div class="controls">
+                        <button class="control-btn" data-section="{category_id}" data-direction="prev">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <button class="control-btn" data-section="{category_id}" data-direction="next">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
                     </div>
                 </div>
                 <div class="videos-grid horizontal-scroll" id="{category_id}"></div>
@@ -122,6 +124,8 @@ if ($categoriesResult) {
     <?php endif; ?>
 
     <script src="script.js"></script>
+    <script src="shared.js"></script>
+    <script src="https://cdn.plyr.io/3.7.8/plyr.polyfilled.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             initializeDropdowns();

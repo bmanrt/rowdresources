@@ -43,24 +43,31 @@ if ($categoriesResult) {
                 <h1>Search Videos</h1>
                 <form id="searchForm" class="search-form" onsubmit="event.preventDefault(); searchVideos();">
                     <div class="search-input-group">
-                        <input type="text" id="searchInput" placeholder="Search by description, tags, or category..." class="search-input">
+                        <div class="search-input-wrapper">
+                            <i class="fas fa-search search-icon"></i>
+                            <input type="text" 
+                                   id="searchInput" 
+                                   placeholder="Search by description, tags, or category..." 
+                                   class="search-input"
+                                   value="<?php echo htmlspecialchars($search_query); ?>">
+                        </div>
                         <button type="submit" id="searchButton" class="search-button">
                             <i class="fas fa-search"></i>
-                            Search
+                            <span>Search</span>
                         </button>
                     </div>
                     <div class="search-filters">
                         <label class="filter-checkbox">
                             <input type="checkbox" id="searchDescription" checked>
-                            Description
+                            <span>Description</span>
                         </label>
                         <label class="filter-checkbox">
                             <input type="checkbox" id="searchTags" checked>
-                            Tags
+                            <span>Tags</span>
                         </label>
                         <label class="filter-checkbox">
                             <input type="checkbox" id="searchCategory" checked>
-                            Category
+                            <span>Category</span>
                         </label>
                     </div>
                 </form>
@@ -76,6 +83,7 @@ if ($categoriesResult) {
         </div>
     </main>
 
+    <script src="script.js"></script>
     <script src="shared.js"></script>
     <script>
         async function searchVideos() {

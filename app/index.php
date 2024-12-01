@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once('auth_check.php');
+require_once('../db_config.php');  // Added database connection
 
 // Ensure user is authenticated
 if (!isAuthenticated()) {
@@ -10,6 +11,16 @@ if (!isAuthenticated()) {
 
 // Get current user data
 $currentUser = getCurrentUser();
+
+// Get categories for the dropdown
+$categoriesQuery = "SELECT DISTINCT category FROM user_media WHERE media_type = 'video' AND category IS NOT NULL ORDER BY category";
+$categoriesResult = $conn->query($categoriesQuery);
+$categories = [];
+if ($categoriesResult) {
+    while ($row = $categoriesResult->fetch_assoc()) {
+        $categories[] = $row['category'];
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -111,5 +122,13 @@ $currentUser = getCurrentUser();
     <?php endif; ?>
 
     <script src="script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeDropdowns();
+            loadLatestVideos();
+            loadCategorySections();
+            initializeScrollControls();
+        });
+    </script>
 </body>
 </html>

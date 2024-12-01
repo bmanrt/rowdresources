@@ -10,27 +10,40 @@ if (!isset($currentUser)) {
             <img src="assets/images/logo.webp" alt="Logo">
         </a>
         
-        <div class="nav-links">
+        <button class="mobile-menu-toggle" aria-label="Toggle menu" id="mobileMenuToggle">
+            <i class="fas fa-bars"></i>
+        </button>
+
+        <div class="nav-links" id="navLinks">
             <a href="index.php" class="nav-link <?php echo basename($_SERVER['PHP_SELF']) === 'index.php' ? 'active' : ''; ?>">
                 <i class="fas fa-home"></i>
-                Home
+                <span>Home</span>
             </a>
             
             <div class="dropdown">
                 <div class="nav-link dropdown-toggle">
                     <i class="fas fa-folder"></i>
-                    Categories
+                    <span>Categories</span>
                     <i class="fas fa-chevron-down"></i>
                 </div>
                 <div class="dropdown-menu" id="categoriesDropdown">
-                    <!-- Categories will be populated by JavaScript -->
+                    <a href="category.php" class="dropdown-item">
+                        <i class="fas fa-layer-group"></i>
+                        All Categories
+                    </a>
+                    <?php foreach ($categories as $cat): ?>
+                    <a href="category.php?category=<?php echo urlencode($cat); ?>" class="dropdown-item">
+                        <i class="fas fa-folder"></i>
+                        <?php echo htmlspecialchars($cat); ?>
+                    </a>
+                    <?php endforeach; ?>
                 </div>
             </div>
 
             <div class="dropdown">
                 <div class="nav-link dropdown-toggle">
                     <i class="fas fa-globe"></i>
-                    English
+                    <span>English</span>
                     <i class="fas fa-chevron-down"></i>
                 </div>
                 <div class="dropdown-menu">
@@ -42,14 +55,14 @@ if (!isset($currentUser)) {
 
             <a href="search.php" class="nav-link <?php echo basename($_SERVER['PHP_SELF']) === 'search.php' ? 'active' : ''; ?>">
                 <i class="fas fa-search"></i>
-                Search
+                <span>Search</span>
             </a>
 
             <!-- User Menu -->
             <div class="dropdown user-menu">
                 <div class="nav-link dropdown-toggle">
                     <i class="fas fa-user"></i>
-                    <?php echo htmlspecialchars($currentUser['username']); ?>
+                    <span><?php echo htmlspecialchars($currentUser['username']); ?></span>
                     <i class="fas fa-chevron-down"></i>
                 </div>
                 <div class="dropdown-menu">
@@ -72,3 +85,4 @@ if (!isset($currentUser)) {
         </div>
     </nav>
 </header>
+<?php include('components/header-scripts.php'); ?>

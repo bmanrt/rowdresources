@@ -40,9 +40,9 @@ if ($categoriesResult) {
     <main>
         <div class="category-container">
             <div class="category-header">
-                <a href="index.html" class="back-to-home">
+                <a href="index.php" class="back-to-home">
                     <i class="fas fa-arrow-left"></i>
-                    Back to Home
+                    <span>Back to Home</span>
                 </a>
                 <h1><?php echo $category ? htmlspecialchars($category) : 'All Categories'; ?></h1>
                 <p class="category-description">
@@ -62,6 +62,7 @@ if ($categoriesResult) {
         </div>
     </main>
 
+    <script src="script.js"></script>
     <script src="shared.js"></script>
     <script>
         async function loadCategoryVideos() {

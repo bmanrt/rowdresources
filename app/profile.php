@@ -46,57 +46,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($result->num_rows > 0) {
                 $error = 'Username or email is already taken';
             } else {
-                // Handle profile image upload
-                $profile_image = $user['profile_image'];
-                if (isset($_FILES['profile_image']) && $_FILES['profile_image']['error'] === UPLOAD_ERR_OK) {
-                    $allowed_types = ['image/jpeg', 'image/png', 'image/gif'];
-                    $file_type = $_FILES['profile_image']['type'];
-                    
-                    if (!in_array($file_type, $allowed_types)) {
-                        $error = 'Only JPG, PNG and GIF images are allowed';
-                    } else {
-                        $upload_dir = 'uploads/profiles/';
-                        if (!file_exists($upload_dir)) {
-                            mkdir($upload_dir, 0777, true);
-                        }
-                        
-                        $file_extension = pathinfo($_FILES['profile_image']['name'], PATHINFO_EXTENSION);
-                        $file_name = uniqid('profile_') . '.' . $file_extension;
-                        $upload_path = $upload_dir . $file_name;
-                        
-                        if (move_uploaded_file($_FILES['profile_image']['tmp_name'], $upload_path)) {
-                            // Delete old profile image if exists
-                            if ($profile_image && file_exists($profile_image)) {
-                                unlink($profile_image);
-                            }
-                            $profile_image = $upload_path;
-                        } else {
-                            $error = 'Failed to upload profile image';
-                        }
-                    }
-                }
+                // Update profile
+                $update_stmt = $conn->prepare("UPDATE app_users SET username = ?, email = ?, full_name = ? WHERE id = ?");
+                $update_stmt->bind_param("sssi", $username, $email, $full_name, $currentUser['id']);
                 
-                if (!$error) {
-                    // Update profile
-                    $update_stmt = $conn->prepare("UPDATE app_users SET username = ?, email = ?, full_name = ?, profile_image = ? WHERE id = ?");
-                    $update_stmt->bind_param("ssssi", $username, $email, $full_name, $profile_image, $currentUser['id']);
+                if ($update_stmt->execute()) {
+                    $_SESSION['app_username'] = $username;
+                    $_SESSION['app_email'] = $email;
+                    $success = 'Profile updated successfully';
                     
-                    if ($update_stmt->execute()) {
-                        $_SESSION['app_username'] = $username;
-                        $_SESSION['app_email'] = $email;
-                        $success = 'Profile updated successfully';
-                        
-                        // Refresh user data
-                        $stmt = $conn->prepare("SELECT * FROM app_users WHERE id = ?");
-                        $stmt->bind_param("i", $currentUser['id']);
-                        $stmt->execute();
-                        $user = $stmt->get_result()->fetch_assoc();
-                        $stmt->close();
-                    } else {
-                        $error = 'Failed to update profile';
-                    }
-                    $update_stmt->close();
+                    // Refresh user data
+                    $stmt = $conn->prepare("SELECT * FROM app_users WHERE id = ?");
+                    $stmt->bind_param("i", $currentUser['id']);
+                    $stmt->execute();
+                    $user = $stmt->get_result()->fetch_assoc();
+                    $stmt->close();
+                } else {
+                    $error = 'Failed to update profile';
                 }
+                $update_stmt->close();
             }
             $check_stmt->close();
         }
@@ -152,43 +120,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             margin-bottom: 2rem;
         }
 
-        .profile-avatar {
-            width: 120px;
-            height: 120px;
-            border-radius: 50%;
-            margin: 0 auto 1rem;
-            position: relative;
-            background: rgba(255, 255, 255, 0.1);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-        }
-
-        .profile-avatar img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .profile-avatar .upload-overlay {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: rgba(0, 0, 0, 0.7);
-            padding: 0.5rem;
-            font-size: 0.8rem;
-            text-align: center;
-            cursor: pointer;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-
-        .profile-avatar:hover .upload-overlay {
-            opacity: 1;
-        }
-
         .profile-sections {
             display: grid;
             gap: 2rem;
@@ -230,22 +161,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     <div class="profile-container">
         <div class="profile-header">
-            <form id="avatarForm" method="POST" enctype="multipart/form-data" style="display: none;">
-                <input type="hidden" name="action" value="update_profile">
-                <input type="file" id="profileImageInput" name="profile_image" accept="image/*">
-            </form>
-            
-            <div class="profile-avatar" onclick="document.getElementById('profileImageInput').click()">
-                <?php if ($user['profile_image']): ?>
-                    <img src="<?php echo htmlspecialchars($user['profile_image']); ?>" alt="Profile">
-                <?php else: ?>
-                    <i class="fas fa-user-circle" style="font-size: 3rem; color: var(--gray-400);"></i>
-                <?php endif; ?>
-                <div class="upload-overlay">
-                    <i class="fas fa-camera"></i>
-                    Change Photo
-                </div>
-            </div>
             <h1><?php echo htmlspecialchars($user['full_name']); ?></h1>
             <p class="text-muted"><?php echo htmlspecialchars($user['email']); ?></p>
         </div>
@@ -335,13 +250,5 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </div>
 
     <script src="script.js"></script>
-    <script>
-        // Handle profile image upload
-        document.getElementById('profileImageInput').addEventListener('change', function() {
-            if (this.files && this.files[0]) {
-                document.getElementById('avatarForm').submit();
-            }
-        });
-    </script>
 </body>
 </html>

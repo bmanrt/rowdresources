@@ -3,15 +3,15 @@ session_start();
 require_once('auth_check.php');
 require_once('../db_config.php');
 
-header('Content-Type: application/json');
-
 if (!isAuthenticated()) {
+    header('Content-Type: application/json');
     echo json_encode(['error' => 'Not authenticated']);
     exit;
 }
 
 // Check if all required fields are present
 if (!isset($_POST['videoId'], $_POST['description'], $_POST['category'])) {
+    header('Content-Type: application/json');
     echo json_encode(['error' => 'Missing required fields']);
     exit;
 }
@@ -56,10 +56,13 @@ if ($check_result->num_rows > 0) {
 }
 
 if ($stmt->execute()) {
-    header('Location: player.php?video=' . urlencode($relative_permanent_path) . '&video_id=' . urlencode($video_id));
+    // Only set content type header for error responses
+    $redirect_url = 'player.php?video=' . urlencode($relative_permanent_path) . '&video_id=' . urlencode($video_id);
+    header('Location: ' . $redirect_url);
     exit;
 } else {
     error_log("Database error: " . $stmt->error);
+    header('Content-Type: application/json');
     echo json_encode(['error' => 'Failed to save video details']);
 }
 

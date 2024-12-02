@@ -183,22 +183,33 @@ $currentUser = getCurrentUser();
             const progressBar = document.getElementById('progressBar');
             const progress = document.getElementById('progress');
             const uploadBtn = document.getElementById('uploadBtn');
+            const errorDisplay = document.createElement('div');
+            errorDisplay.className = 'error-message';
+            errorDisplay.style.display = 'none';
+            form.insertBefore(errorDisplay, progressBar);
 
             form.addEventListener('submit', function(e) {
                 e.preventDefault();
+                errorDisplay.style.display = 'none';
 
                 // Validate file size (50MB limit)
                 const fileInput = document.getElementById('media');
                 const maxSize = 50 * 1024 * 1024; // 50MB in bytes
                 
+                if (!fileInput.files.length) {
+                    showError('Please select a file to upload');
+                    return;
+                }
+
                 if (fileInput.files[0].size > maxSize) {
-                    alert('File size exceeds 50MB limit');
+                    showError('File size exceeds 50MB limit');
                     return;
                 }
 
                 const formData = new FormData(this);
                 uploadBtn.disabled = true;
                 progressBar.style.display = 'block';
+                progress.style.width = '0%';
 
                 const xhr = new XMLHttpRequest();
                 xhr.open('POST', this.action, true);
@@ -218,23 +229,30 @@ $currentUser = getCurrentUser();
                             if (response.success) {
                                 window.location.href = response.redirect;
                             } else {
-                                alert(response.error || 'Upload failed');
+                                showError(response.error + (response.details ? '\n' + response.details : ''));
                             }
                         } catch (e) {
-                            alert('Upload failed');
+                            showError('Upload failed: Invalid server response');
                         }
                     } else {
-                        alert('Upload failed');
+                        showError('Upload failed: Server error');
                     }
                 };
 
                 xhr.onerror = function() {
                     uploadBtn.disabled = false;
-                    alert('Upload failed');
+                    showError('Upload failed: Network error');
                 };
 
                 xhr.send(formData);
             });
+
+            function showError(message) {
+                errorDisplay.style.display = 'block';
+                errorDisplay.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${message}`;
+                progressBar.style.display = 'none';
+                uploadBtn.disabled = false;
+            }
         });
     </script>
     <!-- Include mobile navigation and dropdown scripts -->

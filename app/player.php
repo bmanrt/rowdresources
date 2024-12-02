@@ -203,11 +203,6 @@ $displayPath = '/rowd/' . ltrim($dbPath, '/');
 <body>
     <?php include('components/header.php'); ?>
     
-    <div id="notification" class="notification success">
-        <i class="fas fa-check-circle"></i>
-        <span id="notification-message">Video uploaded successfully!</span>
-    </div>
-
     <div class="player-container">
         <a href="javascript:history.back()" class="back-btn">
             <i class="fas fa-arrow-left"></i>
@@ -275,14 +270,6 @@ $displayPath = '/rowd/' . ltrim($dbPath, '/');
                 ],
                 settings: ['captions', 'quality', 'speed', 'loop']
             });
-
-            // Show success notification if coming from upload
-            const urlParams = new URLSearchParams(window.location.search);
-            if (urlParams.get('from') === 'upload') {
-                const notification = document.getElementById('notification');
-                setTimeout(() => notification.classList.add('show'), 100);
-                setTimeout(() => notification.classList.remove('show'), 5000);
-            }
         });
     </script>
 </body>

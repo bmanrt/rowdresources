@@ -119,20 +119,9 @@ if (!file_exists($physical_path)) {
             margin: 0 auto;
             padding-left: 2rem;
             padding-right: 2rem;
-        }
-
-        .upload-header {
-            text-align: center;
-            margin-bottom: 2rem;
-        }
-
-        .upload-header h1 {
-            font-size: 2.5rem;
-            font-weight: 700;
-            margin-bottom: 1rem;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            min-height: calc(100vh - var(--header-height));
+            display: flex;
+            flex-direction: column;
         }
 
         .video-form {
@@ -141,6 +130,27 @@ if (!file_exists($physical_path)) {
             padding: 2rem;
             border: 1px solid rgba(255, 255, 255, 0.1);
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            flex: 1;
+        }
+
+        .video-preview {
+            width: 100%;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+            background: rgba(0, 0, 0, 0.2);
+            position: relative;
+            padding-top: 56.25%; /* 16:9 Aspect Ratio */
+            overflow: hidden;
+        }
+
+        .video-preview video {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            background: #000;
         }
 
         .form-group {
@@ -152,47 +162,36 @@ if (!file_exists($physical_path)) {
             margin-bottom: 0.5rem;
             color: var(--white);
             font-weight: 500;
+            font-size: 0.9rem;
         }
 
-        .video-preview {
+        textarea, select, .select2-container--default .select2-selection--multiple {
             width: 100%;
-            border-radius: 8px;
-            margin-bottom: 1.5rem;
-            background: rgba(0, 0, 0, 0.2);
-        }
-
-        input[type="text"],
-        input[type="url"],
-        textarea,
-        select {
-            width: 100%;
-            padding: 0.75rem 1rem;
+            padding: 0.75rem;
             border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 8px;
-            background: rgba(255, 255, 255, 0.05);
+            background: rgba(0, 0, 0, 0.2);
             color: var(--white);
-            font-size: 1rem;
+            font-size: 0.9rem;
             transition: all 0.3s ease;
         }
 
-        input[type="text"]:focus,
-        input[type="url"]:focus,
-        textarea:focus,
-        select:focus {
-            outline: none;
-            border-color: var(--primary);
-            background: rgba(255, 255, 255, 0.08);
+        textarea {
+            min-height: 100px;
+            resize: vertical;
         }
 
-        .select2-container {
-            width: 100% !important;
+        select {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='white' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: calc(100% - 1rem) center;
+            padding-right: 2.5rem;
         }
 
         .select2-container--default .select2-selection--multiple {
-            background: rgba(255, 255, 255, 0.05) !important;
-            border: 1px solid rgba(255, 255, 255, 0.1) !important;
-            border-radius: 8px !important;
-            color: var(--white) !important;
+            min-height: 100px;
+            background: rgba(0, 0, 0, 0.2) !important;
         }
 
         .select2-container--default .select2-selection--multiple .select2-selection__choice {
@@ -200,12 +199,18 @@ if (!file_exists($physical_path)) {
             border: none !important;
             border-radius: 4px !important;
             color: var(--white) !important;
-            padding: 2px 8px !important;
+            padding: 4px 8px !important;
+            margin: 4px !important;
         }
 
         .select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
             color: var(--white) !important;
             margin-right: 5px !important;
+            border-right: none !important;
+        }
+
+        .select2-container--default .select2-selection--multiple .select2-selection__rendered {
+            padding: 4px !important;
         }
 
         .select2-dropdown {
@@ -213,21 +218,12 @@ if (!file_exists($physical_path)) {
             border: 1px solid rgba(255, 255, 255, 0.1) !important;
         }
 
-        .select2-search__field {
-            background: rgba(255, 255, 255, 0.05) !important;
-            color: var(--white) !important;
-        }
-
-        .select2-results__option {
-            color: var(--white) !important;
-        }
-
-        .select2-results__option--highlighted {
+        .select2-container--default .select2-results__option--highlighted[aria-selected] {
             background: var(--primary) !important;
         }
 
         .btn-primary {
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            background: var(--primary);
             color: var(--white);
             border: none;
             padding: 0.75rem 1.5rem;
@@ -235,13 +231,19 @@ if (!file_exists($physical_path)) {
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
-            width: 100%;
-            margin-top: 1rem;
+            width: auto;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
         }
 
         .btn-primary:hover {
+            background: var(--secondary);
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-primary i {
+            font-size: 1rem;
         }
 
         @media (max-width: 768px) {
@@ -251,10 +253,6 @@ if (!file_exists($physical_path)) {
 
             .video-form {
                 padding: 1.5rem;
-            }
-
-            .upload-header h1 {
-                font-size: 2rem;
             }
         }
     </style>
@@ -271,9 +269,6 @@ if (!file_exists($physical_path)) {
             <div class="video-preview">
                 <video id="videoPreview" controls preload="metadata" controlsList="nodownload">
                     <source src="<?php echo htmlspecialchars($display_path); ?>" type="<?php echo $video_mime_type; ?>">
-                    <source src="<?php echo htmlspecialchars($display_path); ?>" type="video/mp4">
-                    <source src="<?php echo htmlspecialchars($display_path); ?>" type="video/webm">
-                    <source src="<?php echo htmlspecialchars($display_path); ?>" type="video/ogg">
                     Your browser does not support the video tag.
                 </video>
             </div>

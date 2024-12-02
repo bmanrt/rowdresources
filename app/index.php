@@ -172,7 +172,7 @@ if ($categoriesResult) {
     <?php endif; ?>
 
     <!-- Upload Button Widget -->
-    <a href="upload.php" class="upload-btn-widget" title="Upload Video" target="_blank">
+    <a href="upload.php" class="upload-btn-widget" title="Upload Video" target="">
         <i class="fas fa-plus"></i>
     </a>
 

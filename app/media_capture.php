@@ -16,7 +16,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['media'])) {
     require_once('../db_config.php');
     
     $user_id = $currentUser['id'];
-    $target_dir = "../uploads/";
+    $target_dir = "http://154.113.83.252/rowdresources/uploads/";
     
     // Create uploads directory if it doesn't exist
     if (!file_exists($target_dir)) {

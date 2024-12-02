@@ -162,6 +162,7 @@ $currentUser = getCurrentUser();
             <div class="form-group">
                 <label for="media">Select Video</label>
                 <input type="file" id="media" name="media" accept="video/*" required>
+                <small class="form-text text-muted">Maximum file size: 50MB</small>
             </div>
 
             <button type="submit" class="upload-btn" id="uploadBtn">
@@ -169,9 +170,11 @@ $currentUser = getCurrentUser();
                 Upload Video
             </button>
 
-            <div class="progress-bar" id="progressBar">
+            <div class="progress-bar" id="progressBar" style="display: none;">
                 <div class="progress" id="progress"></div>
             </div>
+            
+            <div id="errorDisplay" class="error-message" style="display: none;"></div>
         </form>
     </div>
 
@@ -183,19 +186,16 @@ $currentUser = getCurrentUser();
             const progressBar = document.getElementById('progressBar');
             const progress = document.getElementById('progress');
             const uploadBtn = document.getElementById('uploadBtn');
-            const errorDisplay = document.createElement('div');
-            errorDisplay.className = 'error-message';
-            errorDisplay.style.display = 'none';
-            form.insertBefore(errorDisplay, progressBar);
+            const errorDisplay = document.getElementById('errorDisplay');
 
-            form.addEventListener('submit', function(e) {
+            form.addEventListener('submit', async function(e) {
                 e.preventDefault();
                 errorDisplay.style.display = 'none';
+                progressBar.style.display = 'none';
 
-                // Validate file size (50MB limit)
                 const fileInput = document.getElementById('media');
-                const maxSize = 50 * 1024 * 1024; // 50MB in bytes
-                
+                const maxSize = 50 * 1024 * 1024; // 50MB
+
                 if (!fileInput.files.length) {
                     showError('Please select a file to upload');
                     return;
@@ -206,52 +206,40 @@ $currentUser = getCurrentUser();
                     return;
                 }
 
-                const formData = new FormData(this);
-                uploadBtn.disabled = true;
-                progressBar.style.display = 'block';
-                progress.style.width = '0%';
+                try {
+                    uploadBtn.disabled = true;
+                    progressBar.style.display = 'block';
+                    progress.style.width = '0%';
 
-                const xhr = new XMLHttpRequest();
-                xhr.open('POST', this.action, true);
+                    const formData = new FormData(this);
+                    const response = await fetch('handle_upload.php', {
+                        method: 'POST',
+                        body: formData
+                    });
 
-                xhr.upload.onprogress = function(e) {
-                    if (e.lengthComputable) {
-                        const percentComplete = (e.loaded / e.total) * 100;
-                        progress.style.width = percentComplete + '%';
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
                     }
-                };
 
-                xhr.onload = function() {
-                    uploadBtn.disabled = false;
-                    if (xhr.status === 200) {
-                        try {
-                            const response = JSON.parse(xhr.responseText);
-                            if (response.success) {
-                                window.location.href = response.redirect;
-                            } else {
-                                showError(response.error + (response.details ? '\n' + response.details : ''));
-                            }
-                        } catch (e) {
-                            showError('Upload failed: Invalid server response');
-                        }
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        window.location.href = result.redirect;
                     } else {
-                        showError('Upload failed: Server error');
+                        showError(result.error + (result.details ? '\n' + result.details : ''));
                     }
-                };
-
-                xhr.onerror = function() {
+                } catch (error) {
+                    showError('Upload failed: ' + error.message);
+                } finally {
                     uploadBtn.disabled = false;
-                    showError('Upload failed: Network error');
-                };
-
-                xhr.send(formData);
+                }
             });
 
             function showError(message) {
+                errorDisplay.textContent = message;
                 errorDisplay.style.display = 'block';
-                errorDisplay.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${message}`;
                 progressBar.style.display = 'none';
-                uploadBtn.disabled = false;
+                progress.style.width = '0%';
             }
         });
     </script>

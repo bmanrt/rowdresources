@@ -21,8 +21,8 @@ $user_id = getCurrentUser()['id'];
 // Define upload directories with proper path handling
 $base_dir = dirname(__DIR__);
 $domain_path = "http://154.113.83.252/rowdresources";
-$temp_dir = $base_dir . DIRECTORY_SEPARATOR . 'temp_uploads';
-$upload_dir = $base_dir . DIRECTORY_SEPARATOR . 'uploads';
+$temp_dir = $base_dir . DIRECTORY_SEPARATOR . 'rowdresources' . DIRECTORY_SEPARATOR . 'temp_uploads';
+$upload_dir = $base_dir . DIRECTORY_SEPARATOR . 'rowdresources' . DIRECTORY_SEPARATOR . 'uploads';
 $upload_url = "http://154.113.83.252/rowdresources/uploads";
 
 // Debug information
@@ -80,7 +80,7 @@ echo json_encode([
     'file' => $domain_path . '/temp_uploads/' . $temp_filename,
     'url' => $domain_path . '/temp_uploads/' . $temp_filename,
     'video_id' => $video_id,
-    'redirect' => 'video_details.php?video=' . urlencode($domain_path . '/temp_uploads/' . $temp_filename) . '&video_id=' . $video_id
+    'redirect' => 'video_details.php?video=' . urlencode('/rowdresources/temp_uploads/' . $temp_filename) . '&video_id=' . $video_id
 ]);
 
 $conn->close();

@@ -71,11 +71,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <title>Sign Up - Media Resource Portal</title>
 </head>
 <body>
-   
     <div class="auth-container">
         <div class="auth-box">
             <div class="auth-logo">
-                <img src="assets/images/logo.webp" alt="Logo">
+                <img src="assets/images/logo.webp" alt="ReachOut World Day">
             </div>
             <h1 class="auth-title">Create Account</h1>
             
@@ -95,47 +94,62 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             
             <form method="POST" class="auth-form">
                 <div class="form-group">
-                    <label for="full_name">Full Name</label>
+                    <label for="full_name">
+                        <i class="fas fa-user"></i>
+                        Full Name
+                    </label>
                     <input type="text" id="full_name" name="full_name" required 
                            placeholder="Enter your full name"
                            value="<?php echo htmlspecialchars($_POST['full_name'] ?? ''); ?>">
                 </div>
 
                 <div class="form-group">
-                    <label for="username">Username</label>
+                    <label for="username">
+                        <i class="fas fa-at"></i>
+                        Username
+                    </label>
                     <input type="text" id="username" name="username" required 
                            placeholder="Choose a username"
                            value="<?php echo htmlspecialchars($_POST['username'] ?? ''); ?>">
                 </div>
-                
+
                 <div class="form-group">
-                    <label for="email">Email Address</label>
+                    <label for="email">
+                        <i class="fas fa-envelope"></i>
+                        Email Address
+                    </label>
                     <input type="email" id="email" name="email" required 
-                           placeholder="Enter your email"
+                           placeholder="Enter your email address"
                            value="<?php echo htmlspecialchars($_POST['email'] ?? ''); ?>">
                 </div>
-                
+
                 <div class="form-group">
-                    <label for="password">Password</label>
+                    <label for="password">
+                        <i class="fas fa-lock"></i>
+                        Password
+                    </label>
                     <input type="password" id="password" name="password" required 
                            placeholder="Choose a password">
                 </div>
 
                 <div class="form-group">
-                    <label for="confirm_password">Confirm Password</label>
+                    <label for="confirm_password">
+                        <i class="fas fa-lock"></i>
+                        Confirm Password
+                    </label>
                     <input type="password" id="confirm_password" name="confirm_password" required 
                            placeholder="Confirm your password">
                 </div>
-                
+
                 <button type="submit" class="auth-button">
                     <i class="fas fa-user-plus"></i>
                     Create Account
                 </button>
+
+                <div class="auth-links">
+                    <p>Already have an account? <a href="login.php">Sign In</a></p>
+                </div>
             </form>
-            
-            <div class="auth-links">
-                <p>Already have an account? <a href="login.php">Sign In</a></p>
-            </div>
         </div>
     </div>
 </body>

@@ -62,11 +62,10 @@ if (isset($_GET['timeout']) && $_GET['timeout'] == 1) {
     <title>Login - Media Resource Portal</title>
 </head>
 <body>
-
     <div class="auth-container">
         <div class="auth-box">
             <div class="auth-logo">
-                <img src="assets/images/logo.webp" alt="Logo">
+                <img src="assets/images/logo.webp" alt="ReachOut World Day">
             </div>
             <h1 class="auth-title">Welcome Back</h1>
             
@@ -86,14 +85,20 @@ if (isset($_GET['timeout']) && $_GET['timeout'] == 1) {
             
             <form method="POST" class="auth-form">
                 <div class="form-group">
-                    <label for="login">Email or Username</label>
+                    <label for="login">
+                        <i class="fas fa-user"></i>
+                        Email or Username
+                    </label>
                     <input type="text" id="login" name="login" required 
                            placeholder="Enter your email or username"
                            value="<?php echo htmlspecialchars($_POST['login'] ?? ''); ?>">
                 </div>
                 
                 <div class="form-group">
-                    <label for="password">Password</label>
+                    <label for="password">
+                        <i class="fas fa-lock"></i>
+                        Password
+                    </label>
                     <input type="password" id="password" name="password" required 
                            placeholder="Enter your password">
                 </div>
@@ -102,12 +107,12 @@ if (isset($_GET['timeout']) && $_GET['timeout'] == 1) {
                     <i class="fas fa-sign-in-alt"></i>
                     Sign In
                 </button>
+                
+                <div class="auth-links">
+                    <p>Don't have an account? <a href="register.php">Sign Up</a></p>
+                    <p><a href="forgot_password.php">Forgot Password?</a></p>
+                </div>
             </form>
-            
-            <div class="auth-links">
-                <p>Don't have an account? <a href="register.php">Sign Up</a></p>
-                <p><a href="forgot_password.php">Forgot Password?</a></p>
-            </div>
         </div>
     </div>
 </body>

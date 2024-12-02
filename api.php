@@ -2,7 +2,7 @@
 header('Content-Type: application/json');
 
 // Database configuration
-$servername = "154.113.83.252";
+$servername = "localhost";
 $username = "root";
 $password = "lolamarsh";
 $dbname = "user_capture";

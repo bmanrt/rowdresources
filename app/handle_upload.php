@@ -21,12 +21,11 @@ $user_id = getCurrentUser()['id'];
 // Define upload directories with proper path handling
 $base_dir = dirname(__DIR__);
 $domain_path = "http://154.113.83.252/rowdresources";
-$upload_dir = $base_dir . DIRECTORY_SEPARATOR . 'rowdresources' . DIRECTORY_SEPARATOR . 'uploads';
-$upload_url = "http://154.113.83.252/rowdresources/uploads";
+$upload_dir = $base_dir . DIRECTORY_SEPARATOR . 'rowdresources' . DIRECTORY_SEPARATOR . 'uploads' . DIRECTORY_SEPARATOR . 'videos';
 
 // Debug information
 error_log("Upload attempt started");
-error_log("Upload URL: " . $upload_url);
+error_log("Upload URL: " . $domain_path . "/uploads/videos");
 error_log("Upload dir: " . $upload_dir);
 
 // Verify file upload
@@ -40,7 +39,30 @@ if (!isset($_FILES['media']) || $_FILES['media']['error'] !== UPLOAD_ERR_OK) {
     exit;
 }
 
-// Create uploads directory if it doesn't exist
+// Validate file type
+$allowed_types = ['video/mp4', 'video/webm', 'video/ogg'];
+$file_type = $_FILES['media']['type'];
+if (!in_array($file_type, $allowed_types)) {
+    error_log("Invalid file type: " . $file_type);
+    echo json_encode([
+        'error' => 'Invalid file type',
+        'details' => 'Allowed types: MP4, WebM, OGG'
+    ]);
+    exit;
+}
+
+// Validate file size (50MB max)
+$max_size = 50 * 1024 * 1024; // 50MB in bytes
+if ($_FILES['media']['size'] > $max_size) {
+    error_log("File too large: " . $_FILES['media']['size'] . " bytes");
+    echo json_encode([
+        'error' => 'File too large',
+        'details' => 'Maximum file size is 50MB'
+    ]);
+    exit;
+}
+
+// Create upload directory structure if it doesn't exist
 if (!file_exists($upload_dir)) {
     if (!mkdir($upload_dir, 0755, true)) {
         error_log("Failed to create uploads directory: " . $upload_dir);
@@ -52,33 +74,50 @@ if (!file_exists($upload_dir)) {
     }
 }
 
-// Generate video ID and filename
-$video_id = uniqid('vid_');
-$file_extension = pathinfo($_FILES['media']['name'], PATHINFO_EXTENSION);
-$filename = $video_id . '.' . $file_extension;
-$upload_file = $upload_dir . DIRECTORY_SEPARATOR . $filename;
-
-// Attempt to save uploaded file directly
-if (!move_uploaded_file($_FILES['media']['tmp_name'], $upload_file)) {
-    error_log("Failed to save uploaded file to: " . $upload_file);
+try {
+    // Generate video ID and filename
+    $video_id = uniqid('vid_');
+    $file_extension = strtolower(pathinfo($_FILES['media']['name'], PATHINFO_EXTENSION));
+    
+    // Sanitize filename
+    $filename = $video_id . '.' . $file_extension;
+    $upload_file = $upload_dir . DIRECTORY_SEPARATOR . $filename;
+    
+    // Ensure the upload directory is clean
+    $relative_path = 'rowdresources/uploads/videos/' . $filename;
+    
+    // Attempt to save uploaded file
+    if (!move_uploaded_file($_FILES['media']['tmp_name'], $upload_file)) {
+        throw new Exception("Failed to save uploaded file");
+    }
+    
+    // Set proper file permissions
+    chmod($upload_file, 0644);
+    
+    // Log success
+    error_log("File uploaded successfully: " . $relative_path);
+    
+    // Return success response with correct paths
     echo json_encode([
-        'error' => 'File processing failed',
-        'details' => 'Could not save uploaded file'
+        'success' => true,
+        'file' => $domain_path . '/uploads/videos/' . $filename,
+        'url' => $domain_path . '/uploads/videos/' . $filename,
+        'video_id' => $video_id,
+        'redirect' => 'video_details.php?video=' . urlencode($relative_path) . '&video_id=' . $video_id
     ]);
-    exit;
+
+} catch (Exception $e) {
+    error_log("Upload error: " . $e->getMessage());
+    echo json_encode([
+        'error' => 'Upload failed',
+        'details' => $e->getMessage()
+    ]);
+    
+    // Clean up failed upload if file exists
+    if (isset($upload_file) && file_exists($upload_file)) {
+        unlink($upload_file);
+    }
 }
-
-// Set proper file permissions
-chmod($upload_file, 0644);
-
-// Return success response with correct paths
-echo json_encode([
-    'success' => true,
-    'file' => $domain_path . '/uploads/' . $filename,
-    'url' => $domain_path . '/uploads/' . $filename,
-    'video_id' => $video_id,
-    'redirect' => 'video_details.php?video=' . urlencode('/rowdresources/uploads/' . $filename) . '&video_id=' . $video_id
-]);
 
 $conn->close();
 error_log("Upload handling completed");

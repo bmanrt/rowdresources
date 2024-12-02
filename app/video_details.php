@@ -38,53 +38,46 @@ try {
     $all_tags = [];
 }
 
-// Get video information from URL parameters
-$video_path = isset($_GET['video']) ? trim($_GET['video']) : '';
-$video_id = isset($_GET['video_id']) ? trim($_GET['video_id']) : '';
-
-error_log("Received video_path: " . $video_path);
-error_log("Received video_id: " . $video_id);
-
-// For newly uploaded videos, we only have the video path
+// Get video path and clean it up
+$video_path = $_GET['video'] ?? '';
 if (empty($video_path)) {
-    header("Location: index.php");
+    header('Location: index.php');
     exit();
 }
 
-// If video_id is not set, this is a new upload
-$is_new_upload = empty($video_id);
+// Clean up video path for database lookup
+$video_path = str_replace(['\\', '//'], '/', $video_path);
+$db_path = ltrim($video_path, '/');  // Remove leading slash for DB comparison
 
-// Get existing video details if editing
-$existing_video = null;
-if (!$is_new_upload) {
-    $stmt = $conn->prepare("SELECT * FROM user_media WHERE video_id = ? AND user_id = ?");
-    $user_id = getCurrentUser()['id'];
-    $stmt->bind_param("si", $video_id, $user_id);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    $existing_video = $result->fetch_assoc();
-    $stmt->close();
+error_log("Video Details - Original video path: " . $video_path);
+error_log("Video Details - DB path for lookup: " . $db_path);
 
-    if ($existing_video) {
-        error_log("Found existing video: " . json_encode($existing_video));
-        // If editing, use the file_path from database
-        $video_path = $existing_video['file_path'];
-    }
+// Get video details from database if it exists
+$stmt = $conn->prepare("SELECT * FROM user_media WHERE file_path = ? AND media_type = 'video' LIMIT 1");
+$stmt->bind_param("s", $db_path);
+$stmt->execute();
+$result = $stmt->get_result();
+$existing_video = $result->fetch_assoc();
+
+// Format video path for frontend display
+$display_path = 'http://154.113.83.252/rowdresources/' . ltrim($db_path, '/');
+error_log("Video Details - Display path: " . $display_path);
+
+// Get video MIME type
+$file_extension = strtolower(pathinfo($display_path, PATHINFO_EXTENSION));
+$video_mime_type = 'video/mp4'; // Default
+switch ($file_extension) {
+    case 'webm':
+        $video_mime_type = 'video/webm';
+        break;
+    case 'ogg':
+        $video_mime_type = 'video/ogg';
+        break;
 }
 
-// Clean up video path for display
-$display_path = $video_path;
-if (strpos($display_path, 'http://') === false) {
-    $display_path = str_replace(['\\', '//'], '/', $display_path);
-    if (!str_starts_with($display_path, '/')) {
-        $display_path = '/' . $display_path;
-    }
-    if (!str_starts_with($display_path, '/rowd/')) {
-        $display_path = '/rowd/' . ltrim($display_path, '/');
-    }
-}
-
-error_log("Final display_path: " . $display_path);
+// Check if this is a new upload or editing existing video
+$is_new_upload = empty($existing_video);
+$video_id = $existing_video['id'] ?? '';
 
 // Determine video MIME type
 $file_extension = strtolower(pathinfo($display_path, PATHINFO_EXTENSION));

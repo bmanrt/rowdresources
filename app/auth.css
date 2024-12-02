@@ -95,6 +95,7 @@
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     animation: gradientText 3s ease infinite;
+    line-height: 1.2;
 }
 
 .auth-form {
@@ -137,6 +138,7 @@
     transition: all 0.3s ease;
     box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
     max-width: 100%;
+    font-family: inherit;
 }
 
 .form-group input::placeholder {
@@ -161,7 +163,7 @@
     width: 100%;
     background: linear-gradient(to right, var(--primary), var(--primary-dark));
     color: var(--white);
-    padding: 0.875rem 1.5rem;
+    padding: 1rem 1.5rem;
     border: none;
     border-radius: 12px;
     font-size: 1.1rem;
@@ -176,6 +178,11 @@
         inset 0 1px 0 rgba(255, 255, 255, 0.1);
     position: relative;
     overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    font-family: inherit;
 }
 
 .auth-button::before {
@@ -210,11 +217,11 @@
 }
 
 .auth-button i {
-    margin-right: 0.5rem;
+    font-size: 1.1rem;
 }
 
 .auth-links {
-    margin-top: 2.5rem;
+    margin-top: 2rem;
     padding-top: 1.5rem;
     border-top: 1px solid rgba(255, 255, 255, 0.08);
     text-align: center;
@@ -226,6 +233,7 @@
 .auth-links p {
     color: var(--gray-400);
     margin: 0;
+    font-size: 0.95rem;
 }
 
 .auth-links a {
@@ -256,6 +264,7 @@
     justify-content: center;
     gap: 0.75rem;
     animation: fadeIn 0.3s ease;
+    font-size: 0.95rem;
 }
 
 .auth-error {
@@ -318,6 +327,7 @@
     }
 }
 
+/* Mobile Responsiveness */
 @media (max-width: 480px) {
     .auth-container {
         padding: 1rem;
@@ -325,15 +335,20 @@
 
     .auth-box {
         padding: 1.5rem;
+        border-radius: 16px;
     }
 
     .auth-title {
-        font-size: 2rem;
+        font-size: 1.75rem;
         margin-bottom: 2rem;
     }
 
-    .auth-form {
-        gap: 1.25rem;
+    .auth-logo img {
+        height: 60px;
+    }
+
+    .form-group {
+        gap: 0.5rem;
     }
 
     .form-group input {
@@ -342,11 +357,47 @@
     }
 
     .auth-button {
-        padding: 0.75rem 1.25rem;
+        padding: 0.875rem 1.25rem;
         font-size: 1rem;
     }
 
+    .auth-error,
+    .auth-success {
+        padding: 1rem;
+        font-size: 0.9rem;
+    }
+
+    .auth-links {
+        margin-top: 1.5rem;
+        padding-top: 1.25rem;
+    }
+
+    .auth-links a {
+        padding: 0.5rem;
+    }
+}
+
+/* Small Mobile Styles */
+@media (max-width: 360px) {
+    .auth-box {
+        padding: 1.25rem;
+    }
+
+    .auth-title {
+        font-size: 1.5rem;
+    }
+
     .auth-logo img {
-        height: 60px;
+        height: 50px;
+    }
+
+    .form-group input {
+        padding: 0.7rem 0.875rem;
+        font-size: 0.9rem;
+    }
+
+    .auth-button {
+        padding: 0.75rem 1rem;
+        font-size: 0.95rem;
     }
 }

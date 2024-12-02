@@ -249,7 +249,9 @@ function openVideoModal(videoPath, description, category, date) {
     
     // Format paths for display and player
     const displayPath = videoPath;
-    const dbPath = videoPath.replace('http://154.113.83.252/rowdresources/', '');
+    const dbPath = videoPath.includes('http://154.113.83.252/rowdresources/') 
+        ? videoPath.replace('http://154.113.83.252/rowdresources/', '')
+        : videoPath;
     
     // Update video source and action links
     source.src = displayPath;

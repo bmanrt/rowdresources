@@ -33,6 +33,19 @@ try {
     // Get file extension from current path
     $file_extension = pathinfo($videoPath, PATHINFO_EXTENSION);
     
+    // Check and add necessary columns if they don't exist
+    $required_columns = ['description', 'category', 'tags', 'video_id'];
+    foreach ($required_columns as $column) {
+        $check_column = "SHOW COLUMNS FROM user_media LIKE '$column'";
+        $column_exists = $conn->query($check_column)->num_rows > 0;
+        
+        if (!$column_exists) {
+            $type = ($column === 'description' || $column === 'tags') ? 'TEXT' : 'VARCHAR(255)';
+            $alter_query = "ALTER TABLE user_media ADD COLUMN $column $type";
+            $conn->query($alter_query);
+        }
+    }
+
     // Create new filename with video ID, category, and tags
     $new_filename = sprintf(
         'vid_%s_%s_%s.%s',
@@ -42,31 +55,29 @@ try {
         $file_extension
     );
     
-    $new_path = dirname($videoPath) . '/' . $new_filename;
+    // Use absolute path for file operations
+    $uploads_dir = "/var/www/html/rowdresources/uploads/";
+    $current_file = $uploads_dir . basename($videoPath);
+    $new_path = $uploads_dir . $new_filename;
+    $public_url = "/rowdresources/uploads/" . $new_filename;
 
     // Rename the file
-    if (!rename($videoPath, $new_path)) {
+    if (!rename($current_file, $new_path)) {
         throw new Exception("Error renaming video file");
     }
 
-    // First, let's add the necessary columns if they don't exist
-    $conn->query("ALTER TABLE user_media ADD COLUMN IF NOT EXISTS description TEXT, 
-                 ADD COLUMN IF NOT EXISTS category VARCHAR(255), 
-                 ADD COLUMN IF NOT EXISTS tags TEXT,
-                 ADD COLUMN IF NOT EXISTS video_id VARCHAR(255)");
-
     // Update the video details in database
-    $stmt = $conn->prepare("UPDATE user_media SET description = ?, category = ?, tags = ?, file_path = ? WHERE file_path = ? AND user_id = ?");
-    $stmt->bind_param("sssssi", $description, $category, $tags_json, $new_path, $videoPath, $_SESSION['user_id']);
+    $stmt = $conn->prepare("UPDATE user_media SET description = ?, category = ?, tags = ?, file_path = ? WHERE video_id = ? AND user_id = ?");
+    $stmt->bind_param("sssssi", $description, $category, $tags_json, $public_url, $video_id, $_SESSION['user_id']);
 
     if ($stmt->execute()) {
         echo json_encode([
             'success' => true,
-            'new_path' => $new_path
+            'new_path' => $public_url
         ]);
     } else {
         // If database update fails, try to rename the file back
-        rename($new_path, $videoPath);
+        rename($new_path, $current_file);
         throw new Exception("Error updating video details");
     }
 

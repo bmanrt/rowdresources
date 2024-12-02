@@ -181,7 +181,6 @@ switch ($file_extension) {
                 id="player"
                 playsinline
                 controls
-                data-poster="/path/to/poster.jpg"
             >
                 <source src="<?php echo htmlspecialchars($displayPath); ?>" type="<?php echo $video_mime_type; ?>" />
             </video>

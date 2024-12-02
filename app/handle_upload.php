@@ -21,7 +21,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_FILES["media"])) {
     header('Content-Type: application/json');
     
     try {
-        $target_dir = "../uploads/";
+        $target_dir = "var/www/html/rowdresources/uploads/";
         if (!file_exists($target_dir)) {
             mkdir($target_dir, 0777, true);
         }

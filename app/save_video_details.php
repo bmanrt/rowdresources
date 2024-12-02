@@ -21,10 +21,13 @@ $video_id = $_POST['videoId'];
 $description = trim($_POST['description']);
 $category = trim($_POST['category']);
 $tags = isset($_POST['tags']) ? implode(',', $_POST['tags']) : '';
-$temp_video_path = $_POST['video']; // Get the video path from form
 
-// Move video from temp to permanent storage
-$temp_full_path = "../" . $temp_video_path;
+// Define base paths with proper directory separators
+$base_dir = dirname(__DIR__);
+$temp_video_path = $_POST['video'];
+
+// Normalize paths for cross-platform compatibility
+$temp_full_path = $base_dir . DIRECTORY_SEPARATOR . str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $temp_video_path);
 if (!file_exists($temp_full_path)) {
     echo json_encode(['error' => 'Video file not found']);
     exit;
@@ -33,14 +36,30 @@ if (!file_exists($temp_full_path)) {
 // Create permanent filename with video ID
 $file_extension = pathinfo($temp_full_path, PATHINFO_EXTENSION);
 $permanent_filename = $video_id . "." . $file_extension;
-$permanent_path = "../uploads/" . $permanent_filename;
-$relative_permanent_path = "uploads/" . $permanent_filename;
+$uploads_dir = $base_dir . DIRECTORY_SEPARATOR . 'uploads';
+$permanent_path = $uploads_dir . DIRECTORY_SEPARATOR . $permanent_filename;
+
+// Ensure uploads directory exists with proper permissions
+if (!file_exists($uploads_dir)) {
+    if (!mkdir($uploads_dir, 0755, true)) {
+        echo json_encode(['error' => 'Failed to create uploads directory']);
+        exit;
+    }
+}
+
+// Normalize relative path for database storage
+$relative_permanent_path = str_replace('\\', '/', "uploads/" . $permanent_filename);
 
 // Move the file from temp to permanent location
 if (!rename($temp_full_path, $permanent_path)) {
+    $move_error = error_get_last();
+    error_log("Failed to move video file: " . ($move_error ? $move_error['message'] : 'Unknown error'));
     echo json_encode(['error' => 'Failed to move video file']);
     exit;
 }
+
+// Set proper file permissions
+chmod($permanent_path, 0644);
 
 // Update the video details and path in the database
 $stmt = $conn->prepare("UPDATE user_media SET 

@@ -15,16 +15,23 @@ if (!isAuthenticated()) {
 }
 
 $user_id = getCurrentUser()['id'];
-$temp_dir = "../temp_uploads/";
 
-// Create temp directory if it doesn't exist
-if (!file_exists($temp_dir)) {
-    if (!mkdir($temp_dir, 0777, true)) {
-        error_log("Failed to create temp directory: " . error_get_last()['message']);
-        echo json_encode(['error' => 'Failed to create temp directory']);
-        exit;
+// Define upload directories with proper path handling
+$base_dir = dirname(__DIR__);
+$temp_dir = $base_dir . DIRECTORY_SEPARATOR . 'temp_uploads';
+$upload_dir = $base_dir . DIRECTORY_SEPARATOR . 'uploads';
+
+// Create directories if they don't exist with proper permissions
+foreach ([$temp_dir, $upload_dir] as $dir) {
+    if (!file_exists($dir)) {
+        if (!mkdir($dir, 0755, true)) {
+            error_log("Failed to create directory {$dir}: " . error_get_last()['message']);
+            echo json_encode(['error' => 'Failed to create required directory']);
+            exit;
+        }
     }
-    chmod($temp_dir, 0777);
+    // Ensure proper permissions
+    chmod($dir, 0755);
 }
 
 // Check if file was uploaded
@@ -60,7 +67,7 @@ $file_extension = strtolower(pathinfo($_FILES["media"]["name"], PATHINFO_EXTENSI
 
 // Create a temporary filename with just the ID
 $temp_filename = $video_id . "_temp." . $file_extension;
-$temp_file = $temp_dir . $temp_filename;
+$temp_file = $temp_dir . DIRECTORY_SEPARATOR . $temp_filename;
 
 // Check if file is a video
 $file_type = mime_content_type($_FILES["media"]["tmp_name"]);
@@ -84,8 +91,11 @@ if($file_extension != "mp4" && $file_extension != "avi" && $file_extension != "m
     exit;
 }
 
-// Try to upload file to temporary location
+// Try to upload file to temporary location with proper permissions
 if (move_uploaded_file($_FILES["media"]["tmp_name"], $temp_file)) {
+    // Set proper file permissions
+    chmod($temp_file, 0644);
+
     // Add video_id column if it doesn't exist
     $alter_query = "ALTER TABLE user_media ADD COLUMN IF NOT EXISTS video_id VARCHAR(255), 
                    ADD COLUMN IF NOT EXISTS status VARCHAR(50) DEFAULT 'pending'";
@@ -96,9 +106,11 @@ if (move_uploaded_file($_FILES["media"]["tmp_name"], $temp_file)) {
         exit;
     }
 
+    // Normalize the relative path for database storage
+    $relative_path = str_replace('\\', '/', "temp_uploads/" . $temp_filename);
+
     // Insert the initial record with the temporary filename and pending status
     $stmt = $conn->prepare("INSERT INTO user_media (user_id, file_path, media_type, video_id, status) VALUES (?, ?, 'video', ?, 'pending')");
-    $relative_path = "temp_uploads/" . $temp_filename;
     $stmt->bind_param("iss", $user_id, $relative_path, $video_id);
     
     if ($stmt->execute()) {

@@ -70,10 +70,8 @@ if ($action === 'categories_with_videos') {
             $videos = [];
             while ($video = $videosResult->fetch_assoc()) {
                 // Clean up file path
-                $filePath = str_replace('\\', '/', $video['file_path']);
-                if (!str_starts_with($filePath, '/')) {
-                    $filePath = '/' . $filePath;
-                }
+                $filePath = str_replace(['\\', '//'], '/', $video['file_path']);
+                $filePath = ltrim($filePath, '/');
                 
                 // Parse tags
                 $tags = !empty($video['tags']) ? json_decode($video['tags'], true) : [];
@@ -83,8 +81,7 @@ if ($action === 'categories_with_videos') {
                 $tags = array_map('trim', $tags);
 
                 // Use the correct domain path for videos
-                $videoPath = 'http://154.113.83.252/rowdresources' . $filePath;
-                $physicalPath = __DIR__ . '/../' . $filePath;
+                $videoPath = 'http://154.113.83.252/rowdresources/' . $filePath;
 
                 $videos[] = [
                     'id' => $video['id'],
@@ -92,7 +89,6 @@ if ($action === 'categories_with_videos') {
                     'description' => $video['description'] ?? 'No description',
                     'category' => $video['category'] ?? 'Uncategorized',
                     'created_at' => date('M d, Y', strtotime($video['created_at'])),
-                    'size' => file_exists($physicalPath) ? filesize($physicalPath) : 0,
                     'tags' => $tags
                 ];
             }
@@ -145,20 +141,14 @@ $result = $stmt->get_result();
 $videos = [];
 
 while ($row = $result->fetch_assoc()) {
-    // Clean up file path
-    $filePath = str_replace('\\', '/', $row['file_path']);
+    // Clean up file path using the same logic as player.php
+    $filePath = str_replace(['\\', '//'], '/', $row['file_path']);
     $filePath = ltrim($filePath, '/');
     
     // Build video paths with correct domain
     $videoPath = 'http://154.113.83.252/rowdresources/' . $filePath;
-    $physicalPath = __DIR__ . '/../' . $filePath;
     
     error_log("Processing video - ID: {$row['id']}, Path: {$filePath}");
-    
-    // Check if file exists
-    if (!file_exists($physicalPath)) {
-        error_log("Warning: Video file not found at {$physicalPath}");
-    }
     
     // Parse tags
     $tags = !empty($row['tags']) ? json_decode($row['tags'], true) : [];
@@ -174,7 +164,6 @@ while ($row = $result->fetch_assoc()) {
         'description' => $row['description'] ?? 'No description',
         'category' => $row['category'] ?? 'Uncategorized',
         'created_at' => date('M d, Y', strtotime($row['created_at'])),
-        'size' => file_exists($physicalPath) ? filesize($physicalPath) : 0,
         'tags' => $tags
     ];
 }

@@ -40,13 +40,21 @@ if (!$video) {
 }
 
 // Format video path for frontend display
-$displayPath = '/rowd/' . ltrim($dbPath, '/');
+$displayPath = 'http://154.113.83.252/rowdresources/' . ltrim($dbPath, '/');
 error_log("Player.php - Display path: " . $displayPath);
 
-// Verify file exists
-$physical_path = $_SERVER['DOCUMENT_ROOT'] . $displayPath;
-error_log("Player.php - Physical path: " . $physical_path);
-error_log("Player.php - File exists: " . (file_exists($physical_path) ? 'Yes' : 'No'));
+// Get video MIME type
+$file_extension = strtolower(pathinfo($displayPath, PATHINFO_EXTENSION));
+$video_mime_type = 'video/mp4'; // Default
+switch ($file_extension) {
+    case 'webm':
+        $video_mime_type = 'video/webm';
+        break;
+    case 'ogg':
+    case 'ogv':
+        $video_mime_type = 'video/ogg';
+        break;
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -157,56 +165,6 @@ error_log("Player.php - File exists: " . (file_exists($physical_path) ? 'Yes' : 
             color: var(--primary);
             background: rgba(255, 255, 255, 0.05);
         }
-
-        /* Notification Styles */
-        .notification {
-            position: fixed;
-            top: calc(var(--header-height) + 1rem);
-            right: 1rem;
-            padding: 1rem 1.5rem;
-            border-radius: 8px;
-            color: #fff;
-            font-weight: 500;
-            transform: translateX(150%);
-            transition: transform 0.3s ease;
-            z-index: 1000;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-
-        .notification.success {
-            background: var(--success, #28a745);
-        }
-
-        .notification.show {
-            transform: translateX(0);
-        }
-
-        @media (max-width: 768px) {
-            .player-container {
-                padding: 1rem;
-                padding-top: calc(var(--header-height) + 1rem);
-            }
-
-            .video-info {
-                padding: 1.5rem;
-            }
-
-            .video-title {
-                font-size: 1.5rem;
-            }
-
-            .video-meta {
-                gap: 1rem;
-            }
-
-            .video-meta span {
-                padding: 0.375rem 0.75rem;
-                font-size: 0.875rem;
-            }
-        }
     </style>
 </head>
 <body>
@@ -225,7 +183,7 @@ error_log("Player.php - File exists: " . (file_exists($physical_path) ? 'Yes' : 
                 controls
                 data-poster="/path/to/poster.jpg"
             >
-                <source src="<?php echo htmlspecialchars($displayPath); ?>" type="video/mp4" />
+                <source src="<?php echo htmlspecialchars($displayPath); ?>" type="<?php echo $video_mime_type; ?>" />
             </video>
         </div>
         
@@ -250,7 +208,7 @@ error_log("Player.php - File exists: " . (file_exists($physical_path) ? 'Yes' : 
                 </span>
                 <?php endif; ?>
             </div>
-            <a href="<?php echo htmlspecialchars($videoPath); ?>" download class="download-btn">
+            <a href="<?php echo htmlspecialchars($displayPath); ?>" download class="download-btn">
                 <i class="fas fa-download"></i>
                 <span>Download Video</span>
             </a>

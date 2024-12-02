@@ -25,15 +25,13 @@ $tags = isset($_POST['tags']) ? json_encode($_POST['tags']) : '[]';
 // Clean up video path
 $video_path = trim($_POST['video']);
 $domain_path = "http://154.113.83.252/rowdresources";
-$rowd_prefix = "/rowd/";
 
 // Add debug logging
 error_log("Original video path: " . $video_path);
 
-// Remove domain path and rowd prefix if they exist
+// Remove domain path if it exists
 $video_path = str_replace(['\\', '//'], '/', $video_path);
 $video_path = str_replace($domain_path, '', $video_path);
-$video_path = str_replace($rowd_prefix, '', $video_path);
 $video_path = ltrim($video_path, '/');
 
 error_log("Cleaned video path: " . $video_path);
@@ -56,7 +54,7 @@ try {
             tags = ?,
             file_path = ?
             WHERE video_id = ? AND user_id = ?");
-        $stmt->bind_param("sssss", $description, $category, $tags, $video_path, $video_id, $user_id);
+        $stmt->bind_param("sssssi", $description, $category, $tags, $video_path, $video_id, $user_id);
     } else {
         // Insert new record
         $stmt = $conn->prepare("INSERT INTO user_media 

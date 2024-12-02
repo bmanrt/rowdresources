@@ -19,13 +19,12 @@ if (!isAuthenticated()) {
 $user_id = getCurrentUser()['id'];
 
 // Define upload directories with proper path handling
-$base_dir = dirname(__DIR__);
 $domain_path = "http://154.113.83.252/rowdresources";
-$upload_dir = '/var/www/html/rowdresources/uploads/videos';
+$upload_dir = '/var/www/html/rowdresources/uploads';
 
 // Debug information
 error_log("Upload attempt started");
-error_log("Upload URL: " . $domain_path . "/uploads/videos");
+error_log("Upload URL: " . $domain_path . "/uploads");
 error_log("Upload dir: " . $upload_dir);
 
 // Verify file upload
@@ -81,10 +80,10 @@ try {
     
     // Sanitize filename
     $filename = $video_id . '.' . $file_extension;
-    $upload_file = $upload_dir . DIRECTORY_SEPARATOR . $filename;
+    $upload_file = $upload_dir . '/' . $filename;
     
     // Ensure the upload directory is clean
-    $relative_path = 'rowdresources/uploads/videos/' . $filename;
+    $relative_path = 'uploads/' . $filename;
     
     // Attempt to save uploaded file
     if (!move_uploaded_file($_FILES['media']['tmp_name'], $upload_file)) {
@@ -100,8 +99,8 @@ try {
     // Return success response with correct paths
     echo json_encode([
         'success' => true,
-        'file' => $domain_path . '/uploads/videos/' . $filename,
-        'url' => $domain_path . '/uploads/videos/' . $filename,
+        'file' => $domain_path . '/uploads/' . $filename,
+        'url' => $domain_path . '/uploads/' . $filename,
         'video_id' => $video_id,
         'redirect' => 'video_details.php?video=' . urlencode($relative_path) . '&video_id=' . $video_id
     ]);

@@ -21,14 +21,12 @@ $user_id = getCurrentUser()['id'];
 // Define upload directories with proper path handling
 $base_dir = dirname(__DIR__);
 $domain_path = "http://154.113.83.252/rowdresources";
-$temp_dir = $base_dir . DIRECTORY_SEPARATOR . 'rowdresources' . DIRECTORY_SEPARATOR . 'temp_uploads';
 $upload_dir = $base_dir . DIRECTORY_SEPARATOR . 'rowdresources' . DIRECTORY_SEPARATOR . 'uploads';
 $upload_url = "http://154.113.83.252/rowdresources/uploads";
 
 // Debug information
 error_log("Upload attempt started");
 error_log("Upload URL: " . $upload_url);
-error_log("Temp dir: " . $temp_dir);
 error_log("Upload dir: " . $upload_dir);
 
 // Verify file upload
@@ -42,25 +40,27 @@ if (!isset($_FILES['media']) || $_FILES['media']['error'] !== UPLOAD_ERR_OK) {
     exit;
 }
 
-// Create temp directory if it doesn't exist
-if (!file_exists($temp_dir)) {
-    if (!mkdir($temp_dir, 0755, true)) {
-        error_log("Failed to create temp directory: " . $temp_dir);
+// Create uploads directory if it doesn't exist
+if (!file_exists($upload_dir)) {
+    if (!mkdir($upload_dir, 0755, true)) {
+        error_log("Failed to create uploads directory: " . $upload_dir);
         echo json_encode([
             'error' => 'Server configuration error',
-            'details' => 'Could not create temporary directory'
+            'details' => 'Could not create uploads directory'
         ]);
         exit;
     }
 }
 
-// Generate unique filename
-$temp_filename = uniqid() . '_' . basename($_FILES['media']['name']);
-$temp_file = $temp_dir . DIRECTORY_SEPARATOR . $temp_filename;
+// Generate video ID and filename
+$video_id = uniqid('vid_');
+$file_extension = pathinfo($_FILES['media']['name'], PATHINFO_EXTENSION);
+$filename = $video_id . '.' . $file_extension;
+$upload_file = $upload_dir . DIRECTORY_SEPARATOR . $filename;
 
 // Attempt to move uploaded file
-if (!move_uploaded_file($_FILES['media']['tmp_name'], $temp_file)) {
-    error_log("Failed to move uploaded file to: " . $temp_file);
+if (!move_uploaded_file($_FILES['media']['tmp_name'], $upload_file)) {
+    error_log("Failed to move uploaded file to: " . $upload_file);
     echo json_encode([
         'error' => 'File processing failed',
         'details' => 'Could not save uploaded file'
@@ -69,18 +69,15 @@ if (!move_uploaded_file($_FILES['media']['tmp_name'], $temp_file)) {
 }
 
 // Set proper file permissions
-chmod($temp_file, 0644);
-
-// Generate video ID for the file
-$video_id = uniqid('vid_');
+chmod($upload_file, 0644);
 
 // Return success response with correct paths
 echo json_encode([
     'success' => true,
-    'file' => $domain_path . '/temp_uploads/' . $temp_filename,
-    'url' => $domain_path . '/temp_uploads/' . $temp_filename,
+    'file' => $domain_path . '/uploads/' . $filename,
+    'url' => $domain_path . '/uploads/' . $filename,
     'video_id' => $video_id,
-    'redirect' => 'video_details.php?video=' . urlencode('/rowdresources/temp_uploads/' . $temp_filename) . '&video_id=' . $video_id
+    'redirect' => 'video_details.php?video=' . urlencode('/rowdresources/uploads/' . $filename) . '&video_id=' . $video_id
 ]);
 
 $conn->close();

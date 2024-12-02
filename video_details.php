@@ -1,9 +1,5 @@
 <?php
 session_start();
-if (!isset($_SESSION['user_id'])) {
-    header("Location: login.html");
-    exit();
-}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -282,7 +278,7 @@ if (!isset($_SESSION['user_id'])) {
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    window.location.href = 'app/index.php';
+                    window.location.href = 'index.html';
                 } else {
                     alert('Error saving video details: ' + (data.error || 'Unknown error'));
                 }

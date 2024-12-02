@@ -1,13 +1,9 @@
 <?php
 session_start();
-if (!isset($_SESSION['user_id'])) {
-    header("Location: login.html"); // Redirect to login if not logged in
-    exit();
-}
-
 include('db_config.php'); // Include your database configuration
 
-$user_id = $_SESSION['user_id'];
+// Set default user_id to 0 if not logged in
+$user_id = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : 0;
 $target_dir = "uploads/";
 
 // Generate a unique ID for the video

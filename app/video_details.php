@@ -110,36 +110,152 @@ if (!file_exists($physical_path)) {
     <title>Video Details - Media Resource Portal</title>
     <link rel="stylesheet" href="styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <style>
-        .video-preview {
+        .upload-container {
+            padding-top: calc(var(--header-height) + 2rem);
+            max-width: 800px;
+            margin: 0 auto;
+            padding-left: 2rem;
+            padding-right: 2rem;
+        }
+
+        .upload-header {
+            text-align: center;
             margin-bottom: 2rem;
+        }
+
+        .upload-header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .video-form {
+            background: rgba(255, 255, 255, 0.05);
             border-radius: 12px;
-            overflow: hidden;
-            background: rgba(0, 0, 0, 0.2);
-            position: relative;
-            padding-top: 56.25%; /* 16:9 Aspect Ratio */
+            padding: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
 
-        .video-preview video {
-            position: absolute;
-            top: 0;
-            left: 0;
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--white);
+            font-weight: 500;
+        }
+
+        .video-preview {
             width: 100%;
-            height: 100%;
-            object-fit: contain;
-            background: #000;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            background: rgba(0, 0, 0, 0.2);
         }
 
-        /* Video controls customization */
-        video::-webkit-media-controls {
-            background-color: rgba(0, 0, 0, 0.5);
+        input[type="text"],
+        input[type="url"],
+        textarea,
+        select {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--white);
+            font-size: 1rem;
+            transition: all 0.3s ease;
         }
 
-        video::-webkit-media-controls-panel {
-            display: flex !important;
-            opacity: 1 !important;
+        input[type="text"]:focus,
+        input[type="url"]:focus,
+        textarea:focus,
+        select:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .select2-container {
+            width: 100% !important;
+        }
+
+        .select2-container--default .select2-selection--multiple {
+            background: rgba(255, 255, 255, 0.05) !important;
+            border: 1px solid rgba(255, 255, 255, 0.1) !important;
+            border-radius: 8px !important;
+            color: var(--white) !important;
+        }
+
+        .select2-container--default .select2-selection--multiple .select2-selection__choice {
+            background: var(--primary) !important;
+            border: none !important;
+            border-radius: 4px !important;
+            color: var(--white) !important;
+            padding: 2px 8px !important;
+        }
+
+        .select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
+            color: var(--white) !important;
+            margin-right: 5px !important;
+        }
+
+        .select2-dropdown {
+            background: var(--background) !important;
+            border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        }
+
+        .select2-search__field {
+            background: rgba(255, 255, 255, 0.05) !important;
+            color: var(--white) !important;
+        }
+
+        .select2-results__option {
+            color: var(--white) !important;
+        }
+
+        .select2-results__option--highlighted {
+            background: var(--primary) !important;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: var(--white);
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-top: 1rem;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        @media (max-width: 768px) {
+            .upload-container {
+                padding: calc(var(--header-height) + 1rem) 1rem 2rem;
+            }
+
+            .video-form {
+                padding: 1.5rem;
+            }
+
+            .upload-header h1 {
+                font-size: 2rem;
+            }
         }
     </style>
 </head>
@@ -151,7 +267,7 @@ if (!file_exists($physical_path)) {
             <h1><?php echo $is_new_upload ? 'Add Video Details' : 'Edit Video Details'; ?></h1>
         </div>
         
-        <div class="upload-form">
+        <div class="video-form">
             <div class="video-preview">
                 <video id="videoPreview" controls preload="metadata" controlsList="nodownload">
                     <source src="<?php echo htmlspecialchars($display_path); ?>" type="<?php echo $video_mime_type; ?>">
@@ -202,7 +318,7 @@ if (!file_exists($physical_path)) {
                     </select>
                 </div>
 
-                <button type="submit" class="submit-btn">
+                <button type="submit" class="btn-primary">
                     <i class="fas fa-save"></i> 
                     <?php echo $is_new_upload ? 'Save Details' : 'Update Details'; ?>
                 </button>

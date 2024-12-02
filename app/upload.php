@@ -27,7 +27,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_FILES["media"])) {
     header('Content-Type: application/json');
     
     try {
-        $target_dir = "../uploads/";
+        $target_dir = "/var/www/html/rowdresources/uploads/";
         if (!file_exists($target_dir)) {
             mkdir($target_dir, 0777, true);
         }
@@ -474,11 +474,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_FILES["media"])) {
             })
 
             .catch(error => {
-
                 console.error('Error:', error);
-
-                alert('An error occurred during upload');
-
+                // Try to get more detailed error information
+                error.text().then(errorText => {
+                    try {
+                        const errorData = JSON.parse(errorText);
+                        alert(errorData.error || 'An error occurred during upload');
+                    } catch (e) {
+                        alert('Upload failed: ' + errorText);
+                    }
+                }).catch(() => {
+                    alert('An error occurred during upload: ' + error.statusText);
+                });
             });
 
         });

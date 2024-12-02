@@ -22,8 +22,9 @@ $description = trim($_POST['description']);
 $category = trim($_POST['category']);
 $tags = isset($_POST['tags']) ? implode(',', $_POST['tags']) : '';
 
-// Define base paths with proper directory separators
+// Define base paths and URLs
 $base_dir = dirname(__DIR__);
+$domain_path = "http://154.113.83.252/rowdresources";
 $temp_video_path = $_POST['video'];
 
 // Normalize paths for cross-platform compatibility
@@ -47,8 +48,8 @@ if (!file_exists($uploads_dir)) {
     }
 }
 
-// Normalize relative path for database storage
-$relative_permanent_path = str_replace('\\', '/', "uploads/" . $permanent_filename);
+// Set the URL path for database storage
+$relative_permanent_path = $domain_path . "/uploads/" . $permanent_filename;
 
 // Move the file from temp to permanent location
 if (!rename($temp_full_path, $permanent_path)) {

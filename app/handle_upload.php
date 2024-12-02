@@ -20,11 +20,15 @@ $user_id = getCurrentUser()['id'];
 
 // Define upload directories with proper path handling
 $base_dir = dirname(__DIR__);
+$domain_path = "http://154.113.83.252/rowdresources";
 $temp_dir = $base_dir . DIRECTORY_SEPARATOR . 'temp_uploads';
 $upload_dir = $base_dir . DIRECTORY_SEPARATOR . 'uploads';
+$upload_url = "http://154.113.83.252/rowdresources/uploads";
 
 // Debug information
 error_log("Upload attempt - Base dir: " . $base_dir);
+error_log("Domain path: " . $domain_path);
+error_log("Upload URL: " . $upload_url);
 error_log("Temp dir: " . $temp_dir);
 error_log("Upload dir: " . $upload_dir);
 
@@ -151,9 +155,11 @@ if (move_uploaded_file($_FILES["media"]["tmp_name"], $temp_file)) {
     }
     error_log("Database table structure verified successfully");
 
-    // Normalize the relative path for database storage
-    $relative_path = str_replace('\\', '/', "temp_uploads/" . $temp_filename);
+    // Normalize the relative path for database storage and URL access
+    $relative_path = "uploads/" . $temp_filename;
+    $file_url = "http://154.113.83.252/rowdresources/uploads/" . $temp_filename;
     error_log("Normalized relative path: " . $relative_path);
+    error_log("File URL: " . $file_url);
 
     // Insert the initial record with the temporary filename and pending status
     $stmt = $conn->prepare("INSERT INTO user_media (user_id, file_path, media_type, video_id, status) VALUES (?, ?, 'video', ?, 'pending')");
@@ -173,7 +179,8 @@ if (move_uploaded_file($_FILES["media"]["tmp_name"], $temp_file)) {
         error_log("Successfully inserted record into database");
         echo json_encode([
             'success' => true,
-            'redirect' => 'video_details.php?video=' . urlencode($relative_path) . '&video_id=' . urlencode($video_id)
+            'redirect' => 'video_details.php?video=' . urlencode($relative_path) . '&video_id=' . urlencode($video_id),
+            'file_url' => $file_url
         ]);
     } else {
         error_log("Database insert error: " . $stmt->error);

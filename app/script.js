@@ -104,9 +104,8 @@ function formatFileSize(bytes) {
 
 // Create video card HTML
 function createVideoCard(video) {
-    const videoPath = video.path.startsWith('http') ? 
-        video.path : 
-        (video.path.startsWith('/') ? video.path : '/' + video.path);
+    // Use the video path directly as it's already formatted in fetch_videos.php
+    const videoPath = video.path;
     
     return `
         <div class="video-card" onclick="openVideoModal('${encodeURIComponent(videoPath)}', '${encodeURIComponent(video.description || 'No description')}', '${encodeURIComponent(video.category || 'Uncategorized')}', '${encodeURIComponent(video.created_at)}')">
@@ -232,7 +231,6 @@ function initializeScrollControls() {
         });
     });
 }
-
 // Mobile Menu and Dropdown Functionality
 document.addEventListener('DOMContentLoaded', () => {
     const mobileMenuToggle = document.getElementById('mobileMenuToggle');
@@ -315,7 +313,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 });
-
 // Initialize everything when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
     initializeDropdowns();

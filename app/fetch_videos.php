@@ -110,34 +110,62 @@ if ($action === 'categories_with_videos') {
 
 // Original video fetching logic for a specific category or all videos
 $category = isset($_GET['category']) ? $_GET['category'] : '';
+
+error_log("Fetching videos - Category: " . ($category ?: 'All'));
+
+// Use prepared statement for better security
 $sql = "SELECT * FROM user_media WHERE media_type = 'video'";
+$params = [];
+$types = "";
+
 if ($category) {
-    $sql .= " AND category = '" . $conn->real_escape_string($category) . "'";
+    $sql .= " AND category = ?";
+    $params[] = $category;
+    $types .= "s";
 }
 $sql .= " ORDER BY created_at DESC LIMIT 8";
 
-$result = $conn->query($sql);
-if (!$result) {
-    die(json_encode(['error' => 'Query failed: ' . $conn->error]));
+$stmt = $conn->prepare($sql);
+if (!$stmt) {
+    error_log("Query preparation failed: " . $conn->error);
+    die(json_encode(['error' => 'Failed to prepare query']));
 }
 
+if (!empty($params)) {
+    $stmt->bind_param($types, ...$params);
+}
+
+if (!$stmt->execute()) {
+    error_log("Query execution failed: " . $stmt->error);
+    die(json_encode(['error' => 'Failed to execute query']));
+}
+
+$result = $stmt->get_result();
 $videos = [];
+
 while ($row = $result->fetch_assoc()) {
     // Clean up file path
     $filePath = str_replace('\\', '/', $row['file_path']);
-    if (!str_starts_with($filePath, '/')) {
-        $filePath = '/' . $filePath;
+    $filePath = ltrim($filePath, '/');
+    
+    // Build video paths
+    $videoPath = '/rowd/' . $filePath;
+    $physicalPath = __DIR__ . '/../' . $filePath;
+    
+    error_log("Processing video - ID: {$row['id']}, Path: {$filePath}");
+    
+    // Check if file exists
+    if (!file_exists($physicalPath)) {
+        error_log("Warning: Video file not found at {$physicalPath}");
     }
     
     // Parse tags
     $tags = !empty($row['tags']) ? json_decode($row['tags'], true) : [];
     if (json_last_error() !== JSON_ERROR_NONE) {
+        error_log("Warning: Invalid JSON in tags for video ID {$row['id']}");
         $tags = !empty($row['tags']) ? explode(',', $row['tags']) : [];
     }
     $tags = array_map('trim', $tags);
-
-    $videoPath = '/rowd/' . $filePath;
-    $physicalPath = __DIR__ . '/../' . $filePath;
 
     $videos[] = [
         'id' => $row['id'],
@@ -149,6 +177,8 @@ while ($row = $result->fetch_assoc()) {
         'tags' => $tags
     ];
 }
+
+error_log("Fetched " . count($videos) . " videos");
 
 echo json_encode(['videos' => $videos]);
 $conn->close();

@@ -3,6 +3,11 @@ session_start();
 require_once('auth_check.php');
 require_once('../db_config.php');
 
+// Enable error logging
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+error_log("Starting video_details.php");
+
 if (!isAuthenticated()) {
     header("Location: login.php");
     exit();
@@ -34,8 +39,11 @@ try {
 }
 
 // Get video information from URL parameters
-$video_path = isset($_GET['video']) ? $_GET['video'] : '';
-$video_id = isset($_GET['video_id']) ? $_GET['video_id'] : '';
+$video_path = isset($_GET['video']) ? trim($_GET['video']) : '';
+$video_id = isset($_GET['video_id']) ? trim($_GET['video_id']) : '';
+
+error_log("Received video_path: " . $video_path);
+error_log("Received video_id: " . $video_id);
 
 // For newly uploaded videos, we only have the video path
 if (empty($video_path)) {
@@ -56,6 +64,12 @@ if (!$is_new_upload) {
     $result = $stmt->get_result();
     $existing_video = $result->fetch_assoc();
     $stmt->close();
+
+    if ($existing_video) {
+        error_log("Found existing video: " . json_encode($existing_video));
+        // If editing, use the file_path from database
+        $video_path = $existing_video['file_path'];
+    }
 }
 
 // Clean up video path for display
@@ -64,7 +78,29 @@ if (!str_starts_with($display_path, '/')) {
     $display_path = '/' . $display_path;
 }
 if (!str_starts_with($display_path, '/rowd/')) {
-    $display_path = '/rowd' . $display_path;
+    $display_path = '/rowd/' . ltrim($display_path, '/');
+}
+
+error_log("Final display_path: " . $display_path);
+
+// Determine video MIME type
+$file_extension = strtolower(pathinfo($display_path, PATHINFO_EXTENSION));
+$video_mime_type = 'video/mp4'; // Default
+switch ($file_extension) {
+    case 'webm':
+        $video_mime_type = 'video/webm';
+        break;
+    case 'ogg':
+    case 'ogv':
+        $video_mime_type = 'video/ogg';
+        break;
+}
+
+// Check if video file exists
+$physical_path = $_SERVER['DOCUMENT_ROOT'] . $display_path;
+error_log("Checking physical path: " . $physical_path);
+if (!file_exists($physical_path)) {
+    error_log("Warning: Video file not found at: " . $physical_path);
 }
 ?>
 <!DOCTYPE html>
@@ -77,7 +113,137 @@ if (!str_starts_with($display_path, '/rowd/')) {
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        .upload-container {
+        /* Previous styles remain unchanged */
+    </style>
+</head>
+<body>
+    <?php include('components/header.php'); ?>
+    
+    <div class="upload-container">
+        <div class="upload-header">
+            <h1><?php echo $is_new_upload ? 'Add Video Details' : 'Edit Video Details'; ?></h1>
+        </div>
+        
+        <div class="upload-form">
+            <div class="video-preview">
+                <video id="videoPreview" controls preload="metadata" controlsList="nodownload">
+                    <source src="<?php echo htmlspecialchars($display_path); ?>" type="<?php echo $video_mime_type; ?>">
+                    <source src="<?php echo htmlspecialchars($display_path); ?>" type="video/mp4">
+                    <source src="<?php echo htmlspecialchars($display_path); ?>" type="video/webm">
+                    <source src="<?php echo htmlspecialchars($display_path); ?>" type="video/ogg">
+                    Your browser does not support the video tag.
+                </video>
+            </div>
+
+            <form id="videoDetailsForm" action="save_video_details.php" method="POST">
+                <input type="hidden" name="video" value="<?php echo htmlspecialchars($video_path); ?>">
+                <input type="hidden" name="videoId" value="<?php echo htmlspecialchars($video_id); ?>">
+                
+                <div class="form-group">
+                    <label for="description">Description:</label>
+                    <textarea id="description" name="description" rows="4" required><?php echo htmlspecialchars($existing_video['description'] ?? ''); ?></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="category">Category:</label>
+                    <select id="category" name="category" required>
+                        <option value="">Select a category</option>
+                        <?php foreach($categories as $category): ?>
+                            <option value="<?php echo htmlspecialchars($category); ?>"
+                                <?php echo ($existing_video && $existing_video['category'] === $category) ? 'selected' : ''; ?>>
+                                <?php echo htmlspecialchars($category); ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="tags">Tags:</label>
+                    <select id="tags" name="tags[]" multiple="multiple" required>
+                        <?php 
+                        $selected_tags = [];
+                        if ($existing_video && !empty($existing_video['tags'])) {
+                            $selected_tags = json_decode($existing_video['tags'], true) ?? [];
+                        }
+                        foreach($all_tags as $tag): 
+                        ?>
+                            <option value="<?php echo htmlspecialchars($tag); ?>"
+                                <?php echo in_array($tag, $selected_tags) ? 'selected' : ''; ?>>
+                                <?php echo htmlspecialchars($tag); ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+
+                <button type="submit" class="submit-btn">
+                    <i class="fas fa-save"></i> 
+                    <?php echo $is_new_upload ? 'Save Details' : 'Update Details'; ?>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            // Initialize Select2
+            $('#tags').select2({
+                placeholder: 'Select tags',
+                allowClear: true,
+                theme: 'default',
+                width: '100%'
+            });
+
+            // Video error handling
+            const video = document.getElementById('videoPreview');
+            video.addEventListener('error', function(e) {
+                console.error('Video error:', e);
+                console.log('Video source:', video.querySelector('source').src);
+                console.log('Video type:', video.querySelector('source').type);
+                // Try alternative video types
+                const sources = video.getElementsByTagName('source');
+                let currentSource = 0;
+                video.addEventListener('error', function(e) {
+                    currentSource++;
+                    if (currentSource < sources.length) {
+                        video.src = sources[currentSource].src;
+                        video.load();
+                    }
+                });
+            });
+
+            // Form validation
+            $('#videoDetailsForm').on('submit', function(e) {
+                const description = $('#description').val().trim();
+                const category = $('#category').val();
+                const tags = $('#tags').val();
+
+                if (!description) {
+                    e.preventDefault();
+                    alert('Please enter a description');
+                    return false;
+                }
+
+                if (!category) {
+                    e.preventDefault();
+                    alert('Please select a category');
+                    return false;
+                }
+
+                if (!tags || tags.length === 0) {
+                    e.preventDefault();
+                    alert('Please select at least one tag');
+                    return false;
+                }
+
+                return true;
+            });
+        });
+    </script>
+</body>
+</html>
+.upload-container {
             padding-top: calc(var(--header-height) + 2rem);
             max-width: 800px;
             margin: 0 auto;

@@ -77,14 +77,11 @@ $display_path = $video_path;
 if (!str_starts_with($display_path, '/')) {
     $display_path = '/' . $display_path;
 }
-if (!str_starts_with($display_path, '/rowd/')) {
-    $display_path = '/rowd/' . ltrim($display_path, '/');
-}
 
 // Build the full video URL for remote server
-$video_url = "http://154.113.83.252" . $display_path;
+$video_url = "http://154.113.83.252/rowdresources/uploads/videos" . basename($display_path);
 
-error_log("Final display_path: " . $display_path);
+error_log("Original path: " . $video_path);
 error_log("Final video URL: " . $video_url);
 
 // Determine video MIME type
@@ -117,7 +114,34 @@ if (!file_exists($physical_path)) {
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        /* Previous styles remain unchanged */
+        .video-preview {
+            margin-bottom: 2rem;
+            border-radius: 12px;
+            overflow: hidden;
+            background: rgba(0, 0, 0, 0.2);
+            position: relative;
+            padding-top: 56.25%; /* 16:9 Aspect Ratio */
+        }
+
+        .video-preview video {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            background: #000;
+        }
+
+        /* Video controls customization */
+        video::-webkit-media-controls {
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+
+        video::-webkit-media-controls-panel {
+            display: flex !important;
+            opacity: 1 !important;
+        }
     </style>
 </head>
 <body>
@@ -132,9 +156,6 @@ if (!file_exists($physical_path)) {
             <div class="video-preview">
                 <video id="videoPreview" controls preload="metadata" controlsList="nodownload">
                     <source src="<?php echo htmlspecialchars($video_url); ?>" type="<?php echo $video_mime_type; ?>">
-                    <source src="<?php echo htmlspecialchars($video_url); ?>" type="video/mp4">
-                    <source src="<?php echo htmlspecialchars($video_url); ?>" type="video/webm">
-                    <source src="<?php echo htmlspecialchars($video_url); ?>" type="video/ogg">
                     Your browser does not support the video tag.
                 </video>
             </div>
@@ -203,21 +224,20 @@ if (!file_exists($physical_path)) {
             const video = document.getElementById('videoPreview');
             video.addEventListener('error', function(e) {
                 console.error('Video error:', e);
-                console.log('Video source:', video.querySelector('source').src);
+                console.log('Video URL:', video.querySelector('source').src);
                 console.log('Video type:', video.querySelector('source').type);
-                // Try alternative video types
-                const sources = video.getElementsByTagName('source');
-                let currentSource = 0;
-                video.addEventListener('error', function(e) {
-                    currentSource++;
-                    if (currentSource < sources.length) {
-                        video.src = sources[currentSource].src;
-                        video.load();
-                    }
-                });
             });
 
-      
+            // Log when video starts playing
+            video.addEventListener('playing', function() {
+                console.log('Video started playing');
+            });
+
+            // Log if video fails to load
+            video.addEventListener('loadeddata', function() {
+                console.log('Video loaded successfully');
+            });
+
             // Form validation
             $('#videoDetailsForm').on('submit', function(e) {
                 const description = $('#description').val().trim();

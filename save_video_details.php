@@ -1,11 +1,5 @@
 <?php
 session_start();
-if (!isset($_SESSION['user_id'])) {
-    http_response_code(401);
-    echo json_encode(['error' => 'Not logged in']);
-    exit;
-}
-
 require_once 'db_config.php';
 
 // Get JSON data from request
@@ -23,6 +17,7 @@ try {
     $category = $data['category'];
     $tags = $data['tags'];
     $video_id = $data['video_id'];
+    $user_id = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : 0; // Default to 0 if no user is logged in
 
     // Convert tags array to string for filename
     $tags_string = implode('-', array_slice($tags, 0, 3)); // Use up to 3 tags in filename
@@ -54,8 +49,8 @@ try {
                  ADD COLUMN IF NOT EXISTS video_id VARCHAR(255)");
 
     // Update the video details in database
-    $stmt = $conn->prepare("UPDATE user_media SET description = ?, category = ?, tags = ?, file_path = ? WHERE file_path = ? AND user_id = ?");
-    $stmt->bind_param("sssssi", $description, $category, $tags_json, $new_path, $videoPath, $_SESSION['user_id']);
+    $stmt = $conn->prepare("UPDATE user_media SET description = ?, category = ?, tags = ?, file_path = ? WHERE file_path = ?");
+    $stmt->bind_param("sssss", $description, $category, $tags_json, $new_path, $videoPath);
 
     if ($stmt->execute()) {
         echo json_encode([

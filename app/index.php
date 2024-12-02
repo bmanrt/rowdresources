@@ -89,7 +89,7 @@ if ($categoriesResult) {
         <div class="hero-section">
             <div class="overlay"></div>
             <div class="hero-content">
-                <h1 class="animate-text">Media Resource Portal</h1>
+                <h1 class="animate-text">ReachOut World Day Media Repository</h1>
                 <p class="hero-description">Beyond reaching the whole world, over 7 billion people will be effectively discipled as they're engaged with Rhapsody of Realities in an accountable way.</p>
                 
                 <div class="cta-buttons">

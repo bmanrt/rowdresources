@@ -42,7 +42,7 @@ if (!isset($currentUser)) {
                 </div>
             </div>
 
-            <div class="dropdown">
+           <!-- <div class="dropdown">
                 <div class="nav-link dropdown-toggle">
                     <i class="fas fa-globe"></i>
                     <span>English</span>
@@ -53,7 +53,7 @@ if (!isset($currentUser)) {
                     <a href="#" class="dropdown-item">Spanish</a>
                     <a href="#" class="dropdown-item">French</a>
                 </div>
-            </div>
+            </div> -->
 
             <a href="../app/search.php" class="nav-link <?php echo basename($_SERVER['PHP_SELF']) === 'search.php' ? 'active' : ''; ?>">
                 <i class="fas fa-search"></i>

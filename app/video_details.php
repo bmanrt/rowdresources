@@ -74,11 +74,14 @@ if (!$is_new_upload) {
 
 // Clean up video path for display
 $display_path = $video_path;
-if (!str_starts_with($display_path, '/')) {
-    $display_path = '/' . $display_path;
-}
-if (!str_starts_with($display_path, '/rowd/')) {
-    $display_path = '/rowd/' . ltrim($display_path, '/');
+if (strpos($display_path, 'http://') === false) {
+    $display_path = str_replace(['\\', '//'], '/', $display_path);
+    if (!str_starts_with($display_path, '/')) {
+        $display_path = '/' . $display_path;
+    }
+    if (!str_starts_with($display_path, '/rowd/')) {
+        $display_path = '/rowd/' . ltrim($display_path, '/');
+    }
 }
 
 error_log("Final display_path: " . $display_path);

@@ -31,6 +31,7 @@ $rowd_prefix = "/rowd/";
 error_log("Original video path: " . $video_path);
 
 // Remove domain path and rowd prefix if they exist
+$video_path = str_replace(['\\', '//'], '/', $video_path);
 $video_path = str_replace($domain_path, '', $video_path);
 $video_path = str_replace($rowd_prefix, '', $video_path);
 $video_path = ltrim($video_path, '/');

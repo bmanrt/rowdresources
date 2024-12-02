@@ -20,7 +20,7 @@ if (empty($videoPath)) {
 }
 
 // Clean up video path for database lookup
-$videoPath = str_replace('\\', '/', $videoPath);
+$videoPath = str_replace(['\\', '//'], '/', $videoPath);
 $dbPath = ltrim($videoPath, '/');  // Remove leading slash for DB comparison
 
 error_log("Player.php - Original video path: " . $videoPath);

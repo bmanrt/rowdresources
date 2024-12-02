@@ -13,10 +13,10 @@ $currentUser = getCurrentUser();
 
 // Handle file upload
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['media'])) {
-    require_once('http://154.113.83.252/rowdresources/db_config.php');
+    require_once('../db_config.php');
     
     $user_id = $currentUser['id'];
-    $target_dir = "http://154.113.83.252/rowdresources/uploads/";
+    $target_dir = "../uploads";
     
     // Create uploads directory if it doesn't exist
     if (!file_exists($target_dir)) {
@@ -29,9 +29,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['media'])) {
     // Get the file extension
     $file_extension = strtolower(pathinfo($_FILES["media"]["name"], PATHINFO_EXTENSION));
 
-    // Create filename with video ID
-    $filename = $video_id . "." . $file_extension;
-    $target_file = $target_dir . $filename;
+    // Create a temporary filename with just the ID
+    $temp_filename = $video_id . "." . $file_extension;
+    $target_file = $target_dir . $temp_filename;
     $uploadOk = 1;
 
     // Check if file is a video
@@ -70,7 +70,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['media'])) {
             $stmt->bind_param("iss", $user_id, $target_file, $video_id);
             if ($stmt->execute()) {
                 // Redirect to video details page with the video ID
-                header("Location: http://154.113.83.252/rowdresources/app/video_details.php?video=" . urlencode($target_file) . "&video_id=" . urlencode($video_id));
+                header("Location: video_details.php?video=" . urlencode($target_file) . "&video_id=" . urlencode($video_id));
                 exit();
             }
             $stmt->close();

@@ -28,7 +28,7 @@ $video_path = isset($_GET['video']) ? $_GET['video'] : '';
 $video_id = isset($_GET['video_id']) ? $_GET['video_id'] : '';
 
 if (empty($video_path) || empty($video_id)) {
-    header("Location: ../dashboard.php");
+    header("Location: index.php");
     exit();
 }
 ?>

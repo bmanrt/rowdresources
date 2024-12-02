@@ -485,7 +485,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_FILES["media"])) {
 
     </script>
 
-    <!-- Include mobile navigation and dropdown scripts
+    <!-- Include mobile navigation and dropdown scripts -->
 
     <script src="js/mobile-nav.js"></script>
 

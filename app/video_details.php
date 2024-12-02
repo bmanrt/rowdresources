@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once('auth_check.php');
+require_once('../db_config.php');
 
 // Ensure user is authenticated
 if (!isAuthenticated()) {
@@ -16,10 +17,31 @@ if (empty($video) || empty($video_id)) {
     exit();
 }
 
-// Debug logging
-error_log("Received video path: " . $video);
-error_log("Received video ID: " . $video_id);
+// Fetch video details from database
+$stmt = $conn->prepare("SELECT * FROM user_media WHERE video_id = ? AND user_id = ?");
+$stmt->bind_param("si", $video_id, $_SESSION['user_id']);
+$stmt->execute();
+$result = $stmt->get_result();
+$video_details = $result->fetch_assoc();
 
+// Fetch categories from database
+$categories_query = "SELECT * FROM categories ORDER BY name";
+$categories_result = $conn->query($categories_query);
+$categories = [];
+while ($row = $categories_result->fetch_assoc()) {
+    $categories[] = $row;
+}
+
+// Fetch tags from database
+$tags_query = "SELECT * FROM tags ORDER BY category, name";
+$tags_result = $conn->query($tags_query);
+$tags_by_category = [];
+while ($row = $tags_result->fetch_assoc()) {
+    if (!isset($tags_by_category[$row['category']])) {
+        $tags_by_category[$row['category']] = [];
+    }
+    $tags_by_category[$row['category']][] = $row['name'];
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -168,6 +190,84 @@ error_log("Received video ID: " . $video_id);
                 padding: 1.5rem;
             }
         }
+
+        .video-preview {
+            margin: 2rem 0;
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 0.5rem;
+            overflow: hidden;
+        }
+
+        .video-preview video {
+            max-height: 400px;
+            width: 100%;
+            object-fit: contain;
+            background: #000;
+        }
+
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 0.5rem;
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--white);
+            font-size: 1rem;
+        }
+
+        .form-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .select2-container--default .select2-selection--multiple {
+            background-color: rgba(255, 255, 255, 0.05) !important;
+            border: 1px solid rgba(255, 255, 255, 0.1) !important;
+            border-radius: 0.5rem !important;
+            color: var(--white) !important;
+        }
+
+        .select2-container--default .select2-selection--multiple .select2-selection__choice {
+            background-color: var(--primary-color) !important;
+            border: none !important;
+            color: var(--white) !important;
+            padding: 0.25rem 0.5rem !important;
+        }
+
+        .btn-primary {
+            display: inline-block;
+            padding: 0.75rem 1.5rem;
+            background: var(--primary-color);
+            color: var(--white);
+            border: none;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-color-dark);
+        }
+
+        /* Loading state */
+        .btn-primary.loading {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        /* Success message */
+        .success-message {
+            padding: 1rem;
+            background: rgba(0, 255, 0, 0.1);
+            border: 1px solid rgba(0, 255, 0, 0.2);
+            border-radius: 0.5rem;
+            color: #00ff00;
+            margin-bottom: 1rem;
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -178,38 +278,50 @@ error_log("Received video ID: " . $video_id);
             <h1>Video Details</h1>
             <p>Add information about your video</p>
         </div>
+
+        <!-- Video Preview -->
+        <div class="video-preview">
+            <video controls width="100%" id="videoPreview">
+                <source src="<?php echo htmlspecialchars($video); ?>" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+        </div>
+
         <form id="videoDetailsForm">
-            <input type="hidden" id="videoPath" value="<?php echo htmlspecialchars($video); ?>">
             <input type="hidden" id="videoId" value="<?php echo htmlspecialchars($video_id); ?>">
+            <input type="hidden" id="videoPath" value="<?php echo htmlspecialchars($video); ?>">
             
             <div class="form-group">
-                <label for="description"><i class="fas fa-align-left"></i> Description</label>
-                <textarea id="description" name="description" required></textarea>
+                <label for="description">Description</label>
+                <textarea id="description" name="description" required><?php echo htmlspecialchars($video_details['description'] ?? ''); ?></textarea>
             </div>
-            
+
             <div class="form-group">
-                <label for="category"><i class="fas fa-folder"></i> Category</label>
+                <label for="category">Category</label>
                 <select id="category" name="category" required>
                     <option value="">Select a category</option>
-                    <option value="Penetrating with Languages">Penetrating with Languages</option>
-                    <option value="Say Yes to Kids">Say Yes to Kids</option>
-                    <option value="No One Left Behind">No One Left Behind</option>
-                    <option value="Teens Teevolution">Teens Teevolution</option>
-                    <option value="Youths Aglow">Youths Aglow</option>
-                    <option value="Every Minister An Outreach">Every Minister An Outreach</option>
-                    <option value="Digital">Digital</option>
-                    <option value="Dignitaries Distribution">Dignitaries Distribution</option>
-                    <option value="Strategic Distributions">Strategic Distributions</option>
+                    <?php foreach ($categories as $category): ?>
+                        <option value="<?php echo htmlspecialchars($category['name']); ?>"
+                                <?php echo ($video_details['category'] ?? '') === $category['name'] ? 'selected' : ''; ?>>
+                            <?php echo htmlspecialchars($category['name']); ?>
+                        </option>
+                    <?php endforeach; ?>
                 </select>
             </div>
-            
+
             <div class="form-group">
-                <label for="tags"><i class="fas fa-tags"></i> Tags</label>
-                <select id="tags" name="tags[]" multiple="multiple" required>
-                    <!-- Tags will be loaded from data/tags.json -->
+                <label for="tags">Tags</label>
+                <select id="tags" name="tags[]" multiple required>
+                    <?php if (!empty($video_details['tags'])): ?>
+                        <?php foreach (json_decode($video_details['tags'], true) ?? [] as $tag): ?>
+                            <option value="<?php echo htmlspecialchars($tag); ?>" selected>
+                                <?php echo htmlspecialchars($tag); ?>
+                            </option>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
                 </select>
             </div>
-            
+
             <button type="submit" class="btn-submit">
                 <i class="fas fa-save"></i> Save Details
             </button>
@@ -220,72 +332,76 @@ error_log("Received video ID: " . $video_id);
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script>
         $(document).ready(function() {
-            // Initialize Select2 for tags with custom data
-            const predefinedTags = {
-                "Vehicles": ["Planes", "Buses", "Trains"],
-                "Transport Terminals": ["Airports", "Bus Terminals", "Train Terminals"],
-                "Homes": ["Apartment Blocks", "Detached Houses", "Residential Estates", "Neighbourhoods"],
-                "Communities": ["The inner cities", "The Hinterlands", "Communities in crisis"],
-                "Hospitals": ["Teaching Hospitals", "Clinics", "Paediatric Hospitals"],
-                "Farms & Markets": [],
-                "Public Spaces": ["Parks", "Malls", "Shops"],
-                "Hospitality Businesses": ["Hotels", "Restaurants", "Event Centres"],
-                "Public Buildings": ["Government offices", "Courthouses", "Police stations"],
-                "Offices": ["Companies", "Factories"],
-                "Dangerous Jobs": ["Mines", "Offshore Rigs"],
-                "Military Bases": [],
-                "Iconic Landmarks/Tourist Attractions": [],
-                "People With Special Needs": ["Prisons", "Orphanages"]
-            };
-
-            // Flatten tags for Select2
-            let allTags = [];
-            Object.entries(predefinedTags).forEach(([category, tags]) => {
-                allTags.push(category);
-                if (tags.length > 0) {
-                    allTags = allTags.concat(tags);
-                }
-            });
-
+            // Initialize Select2 for tags with data from database
+            const tagsByCategory = <?php echo json_encode($tags_by_category); ?>;
+            
             $('#tags').select2({
                 tags: true,
                 tokenSeparators: [',', ' '],
-                placeholder: 'Add tags...',
-                theme: 'default',
-                data: allTags.map(tag => ({ id: tag, text: tag }))
+                data: Object.values(tagsByCategory).flat().map(tag => ({
+                    id: tag,
+                    text: tag
+                })),
+                placeholder: 'Select or type tags...',
+                theme: 'default'
             });
 
             // Handle form submission
             $('#videoDetailsForm').on('submit', function(e) {
                 e.preventDefault();
                 
-                const data = {
-                    videoPath: $('#videoPath').val(),
+                // Disable submit button and show loading state
+                const $submitBtn = $(this).find('button[type="submit"]');
+                $submitBtn.prop('disabled', true).addClass('loading').html('<i class="fas fa-spinner fa-spin"></i> Saving...');
+                
+                const formData = {
                     video_id: $('#videoId').val(),
+                    videoPath: $('#videoPath').val(),
                     description: $('#description').val(),
                     category: $('#category').val(),
                     tags: $('#tags').val()
                 };
 
-                // Send data to server
-                fetch('save_video_details.php', {
+                // Validate form data
+                if (!formData.description || !formData.category || !formData.tags.length) {
+                    alert('Please fill in all required fields');
+                    $submitBtn.prop('disabled', false).removeClass('loading').html('<i class="fas fa-save"></i> Save Details');
+                    return;
+                }
+
+                $.ajax({
+                    url: 'save_video_details.php',
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
+                    contentType: 'application/json',
+                    data: JSON.stringify(formData),
+                    success: function(response) {
+                        try {
+                            const result = JSON.parse(response);
+                            if (result.success) {
+                                // Show success message
+                                const $successMsg = $('<div class="success-message"><i class="fas fa-check"></i> Video details saved successfully!</div>');
+                                $('#videoDetailsForm').prepend($successMsg);
+                                $successMsg.fadeIn();
+                                
+                                // Redirect after a short delay
+                                setTimeout(() => {
+                                    window.location.href = 'index.php';
+                                }, 1500);
+                            } else {
+                                alert('Error saving video details: ' + (result.error || 'Unknown error'));
+                                $submitBtn.prop('disabled', false).removeClass('loading').html('<i class="fas fa-save"></i> Save Details');
+                            }
+                        } catch (e) {
+                            console.error('Error parsing response:', e);
+                            alert('Error processing server response');
+                            $submitBtn.prop('disabled', false).removeClass('loading').html('<i class="fas fa-save"></i> Save Details');
+                        }
                     },
-                    body: JSON.stringify(data)
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        window.location.href = 'index.php';
-                    } else {
-                        alert('Error saving video details: ' + (data.error || 'Unknown error'));
+                    error: function(xhr, status, error) {
+                        console.error('AJAX Error:', error);
+                        alert('Error saving video details: ' + error);
+                        $submitBtn.prop('disabled', false).removeClass('loading').html('<i class="fas fa-save"></i> Save Details');
                     }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('Error saving video details. Please try again.');
                 });
             });
         });

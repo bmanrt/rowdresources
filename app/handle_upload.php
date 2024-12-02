@@ -21,7 +21,7 @@ $user_id = getCurrentUser()['id'];
 // Define upload directories with proper path handling
 $base_dir = dirname(__DIR__);
 $domain_path = "http://154.113.83.252/rowdresources";
-$upload_dir = $base_dir . DIRECTORY_SEPARATOR . 'rowdresources' . DIRECTORY_SEPARATOR . 'uploads' . DIRECTORY_SEPARATOR . 'videos';
+$upload_dir = '/var/www/html/rowdresources/uploads/videos';
 
 // Debug information
 error_log("Upload attempt started");

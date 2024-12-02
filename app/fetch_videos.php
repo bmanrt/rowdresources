@@ -82,7 +82,8 @@ if ($action === 'categories_with_videos') {
                 }
                 $tags = array_map('trim', $tags);
 
-                $videoPath = '/rowd/' . $filePath;
+                // Use the correct domain path for videos
+                $videoPath = 'http://154.113.83.252/rowdresources' . $filePath;
                 $physicalPath = __DIR__ . '/../' . $filePath;
 
                 $videos[] = [
@@ -148,8 +149,8 @@ while ($row = $result->fetch_assoc()) {
     $filePath = str_replace('\\', '/', $row['file_path']);
     $filePath = ltrim($filePath, '/');
     
-    // Build video paths
-    $videoPath = '/rowd/' . $filePath;
+    // Build video paths with correct domain
+    $videoPath = 'http://154.113.83.252/rowdresources/' . $filePath;
     $physicalPath = __DIR__ . '/../' . $filePath;
     
     error_log("Processing video - ID: {$row['id']}, Path: {$filePath}");

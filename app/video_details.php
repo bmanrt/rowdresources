@@ -99,9 +99,9 @@ switch ($file_extension) {
 // Check if video file exists
 $physical_path = $_SERVER['DOCUMENT_ROOT'] . $display_path;
 error_log("Checking physical path: " . $physical_path);
-if (!file_exists($physical_path)) {
-    error_log("Warning: Video file not found at: " . $physical_path);
-}
+error_log("Document root: " . $_SERVER['DOCUMENT_ROOT']);
+error_log("File exists check: " . (file_exists($physical_path) ? 'true' : 'false'));
+error_log("File readable check: " . (is_readable($physical_path) ? 'true' : 'false'));
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -333,59 +333,58 @@ if (!file_exists($physical_path)) {
                 width: '100%'
             });
 
-            // Video error handling
+            // Video error handling with detailed logging
             const video = document.getElementById('videoPreview');
+            
             video.addEventListener('error', function(e) {
                 console.error('Video error:', e);
+                console.error('Error code:', video.error ? video.error.code : 'N/A');
+                console.error('Error message:', video.error ? video.error.message : 'N/A');
                 console.log('Video source:', video.querySelector('source').src);
                 console.log('Video type:', video.querySelector('source').type);
-                // Try alternative video types
-                const sources = video.getElementsByTagName('source');
-                let currentSource = 0;
-                video.addEventListener('error', function(e) {
-                    currentSource++;
-                    if (currentSource < sources.length) {
-                        video.src = sources[currentSource].src;
-                        video.load();
+            });
+
+            video.addEventListener('loadstart', function() {
+                console.log('Video load started');
+            });
+
+            video.addEventListener('loadedmetadata', function() {
+                console.log('Video metadata loaded');
+                console.log('Duration:', video.duration);
+                console.log('Dimensions:', video.videoWidth, 'x', video.videoHeight);
+            });
+
+            video.addEventListener('canplay', function() {
+                console.log('Video can start playing');
+            });
+
+            // Form submission with video path
+            $('#videoDetailsForm').on('submit', function(e) {
+                e.preventDefault();
+                
+                const formData = new FormData(this);
+                
+                console.log('Submitting form with video path:', formData.get('video'));
+                
+                $.ajax({
+                    url: 'save_video_details.php',
+                    type: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function(response) {
+                        console.log('Save response:', response);
+                        if (response.success) {
+                            window.location.href = response.redirect;
+                        } else {
+                            alert(response.error || 'Failed to save video details');
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Save error:', error);
+                        alert('Failed to save video details: ' + error);
                     }
                 });
-            });
-
-            // Log when video starts playing
-            video.addEventListener('playing', function() {
-                console.log('Video started playing');
-            });
-
-            // Log if video fails to load
-            video.addEventListener('loadeddata', function() {
-                console.log('Video loaded successfully');
-            });
-
-            // Form validation
-            $('#videoDetailsForm').on('submit', function(e) {
-                const description = $('#description').val().trim();
-                const category = $('#category').val();
-                const tags = $('#tags').val();
-
-                if (!description) {
-                    e.preventDefault();
-                    alert('Please enter a description');
-                    return false;
-                }
-
-                if (!category) {
-                    e.preventDefault();
-                    alert('Please select a category');
-                    return false;
-                }
-
-                if (!tags || tags.length === 0) {
-                    e.preventDefault();
-                    alert('Please select at least one tag');
-                    return false;
-                }
-
-                return true;
             });
         });
     </script>

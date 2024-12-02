@@ -76,7 +76,7 @@ try {
     echo json_encode([
         'success' => true,
         'message' => 'Video details saved successfully',
-        'redirect' => 'index.php',
+        'redirect' => 'player.php?video=' . urlencode($video_path),
         'video_path' => $video_path,
         'video_id' => $video_id
     ]);

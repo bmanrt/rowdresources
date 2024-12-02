@@ -23,6 +23,9 @@ if (empty($videoPath)) {
 $videoPath = str_replace('\\', '/', $videoPath);
 $dbPath = ltrim($videoPath, '/');  // Remove leading slash for DB comparison
 
+error_log("Player.php - Original video path: " . $videoPath);
+error_log("Player.php - DB path for lookup: " . $dbPath);
+
 // Get video details from database
 $stmt = $conn->prepare("SELECT * FROM user_media WHERE file_path = ? AND media_type = 'video' LIMIT 1");
 $stmt->bind_param("s", $dbPath);
@@ -31,12 +34,19 @@ $result = $stmt->get_result();
 $video = $result->fetch_assoc();
 
 if (!$video) {
+    error_log("Player.php - Video not found in database: " . $dbPath);
     header('Location: index.php');
     exit();
 }
 
 // Format video path for frontend display
 $displayPath = '/rowd/' . ltrim($dbPath, '/');
+error_log("Player.php - Display path: " . $displayPath);
+
+// Verify file exists
+$physical_path = $_SERVER['DOCUMENT_ROOT'] . $displayPath;
+error_log("Player.php - Physical path: " . $physical_path);
+error_log("Player.php - File exists: " . (file_exists($physical_path) ? 'Yes' : 'No'));
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -213,9 +223,9 @@ $displayPath = '/rowd/' . ltrim($dbPath, '/');
                 id="player"
                 playsinline
                 controls
-                data-plyr-config='{ "settings": ["captions", "quality", "speed", "loop"] }'
+                data-poster="/path/to/poster.jpg"
             >
-                <source src="<?php echo htmlspecialchars($displayPath); ?>" type="video/mp4">
+                <source src="<?php echo htmlspecialchars($displayPath); ?>" type="video/mp4" />
             </video>
         </div>
         
@@ -248,17 +258,15 @@ $displayPath = '/rowd/' . ltrim($dbPath, '/');
     </div>
 
     <script src="shared.js"></script>
-    <script src="https://cdn.plyr.io/3.7.8/plyr.polyfilled.js"></script>
+    <script src="https://cdn.plyr.io/3.7.8/plyr.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Initialize Plyr
             const player = new Plyr('#player', {
                 controls: [
                     'play-large',
                     'play',
                     'progress',
                     'current-time',
-                    'duration',
                     'mute',
                     'volume',
                     'captions',
@@ -266,8 +274,35 @@ $displayPath = '/rowd/' . ltrim($dbPath, '/');
                     'pip',
                     'airplay',
                     'fullscreen'
-                ],
-                settings: ['captions', 'quality', 'speed', 'loop']
+                ]
+            });
+
+            // Error handling
+            const video = document.querySelector('#player');
+            
+            video.addEventListener('error', function(e) {
+                console.error('Video error:', e);
+                console.error('Error code:', video.error ? video.error.code : 'N/A');
+                console.error('Error message:', video.error ? video.error.message : 'N/A');
+                console.log('Video source:', video.querySelector('source').src);
+            });
+
+            video.addEventListener('loadstart', function() {
+                console.log('Video load started');
+            });
+
+            video.addEventListener('loadedmetadata', function() {
+                console.log('Video metadata loaded');
+                console.log('Duration:', video.duration);
+                console.log('Dimensions:', video.videoWidth, 'x', video.videoHeight);
+            });
+
+            player.on('ready', () => {
+                console.log('Player is ready');
+            });
+
+            player.on('error', (error) => {
+                console.error('Plyr error:', error);
             });
         });
     </script>

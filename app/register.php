@@ -43,7 +43,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $insert_stmt->bind_param("sss", $username, $email, $hashed_password);
             
             if ($insert_stmt->execute()) {
-                $success = 'Registration successful! You can now login.';
+                $_SESSION['user_id'] = $conn->insert_id;
+                header('Location: index.php');
+                exit();
             } else {
                 $error = 'Registration failed. Please try again.';
             }

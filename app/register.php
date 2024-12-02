@@ -1,10 +1,11 @@
 <?php
 session_start();
 require_once('../db_config.php');
+require_once('includes/SessionManager.php');
 
 // Check if user is already logged in
 if (isset($_SESSION['user_id'])) {
-    header('Location: index.html');
+    header('Location: index.php');
     exit();
 }
 
@@ -43,7 +44,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $insert_stmt->bind_param("sss", $username, $email, $hashed_password);
             
             if ($insert_stmt->execute()) {
-                $_SESSION['user_id'] = $conn->insert_id;
+                $userId = $conn->insert_id;
+                $userData = [
+                    'id' => $userId,
+                    'username' => $username,
+                    'email' => $email,
+                    'role' => 'user'
+                ];
+                $session = SessionManager::getInstance();
+                $session->setUserSession($userData);
                 header('Location: index.php');
                 exit();
             } else {

@@ -223,28 +223,6 @@ function initializeVideoPlayer() {
     }
 }
 
-// Create video card HTML helper
-function createVideoCard(video) {
-    const videoPath = video.path.startsWith('http') ? 
-        video.path : 
-        (video.path.startsWith('/') ? video.path : '/' + video.path);
-    
-    return `
-        <div class="video-card" onclick="openVideoModal('${encodeURIComponent(videoPath)}', '${encodeURIComponent(video.description || 'No description')}', '${encodeURIComponent(video.category || 'Uncategorized')}', '${encodeURIComponent(video.created_at)}')">
-            <div class="video-thumbnail">
-                <video src="${videoPath}" preload="metadata"></video>
-            </div>
-            <div class="video-info">
-                <h3 class="video-title">${video.description || 'No description'}</h3>
-                <div class="video-meta">
-                    <span><i class="fas fa-folder"></i>${video.category || 'Uncategorized'}</span>
-                    <span><i class="fas fa-calendar"></i>${video.created_at}</span>
-                </div>
-            </div>
-        </div>
-    `;
-}
-
 // Open video modal
 function openVideoModal(videoPath, description, category, date) {
     console.log('Opening video modal...');
@@ -270,8 +248,8 @@ function openVideoModal(videoPath, description, category, date) {
     modal.querySelector('.date').innerHTML = `<i class="fas fa-calendar"></i>${date}`;
     
     // Format paths for display and player
-    const displayPath = videoPath.startsWith('/') ? videoPath : '/' + videoPath;
-    const dbPath = displayPath.replace('/rowd/', '').replace(/^\//, '');
+    const displayPath = videoPath;
+    const dbPath = videoPath.replace('http://154.113.83.252/rowdresources/', '');
     
     // Update video source and action links
     source.src = displayPath;

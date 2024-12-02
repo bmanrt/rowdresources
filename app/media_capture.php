@@ -13,7 +13,7 @@ $currentUser = getCurrentUser();
 
 // Handle file upload
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['media'])) {
-    require_once('http://154.113.83.252/rowdresources//db_config.php');
+    require_once('http://154.113.83.252/rowdresources/db_config.php');
     
     $user_id = $currentUser['id'];
     $target_dir = "http://154.113.83.252/rowdresources/uploads/";

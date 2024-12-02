@@ -27,7 +27,7 @@ if ($categoriesResult) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Media Resource Portal</title>
+    <title>Media Repository</title>
     <link rel="stylesheet" href="styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -172,7 +172,7 @@ if ($categoriesResult) {
     <?php endif; ?>
 
     <!-- Upload Button Widget -->
-    <a href="../media_capture.html" class="upload-btn-widget" title="Upload Video" target="_blank">
+    <a href="media_capture.php" class="upload-btn-widget" title="Upload Video" target="_blank">
         <i class="fas fa-plus"></i>
     </a>
 

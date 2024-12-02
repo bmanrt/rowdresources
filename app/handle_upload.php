@@ -74,12 +74,15 @@ chmod($temp_file, 0644);
 // File URL for external access
 $file_url = $upload_url . '/' . $temp_filename;
 
-// Return success response
+// External URL path
+$external_url = $domain_path . '/uploads/' . $temp_filename;
+
+// Return success response with external URL
 echo json_encode([
     'success' => true,
-    'file' => 'temp_uploads/' . $temp_filename,
+    'file' => $external_url,
     'url' => $file_url,
-    'redirect' => 'edit_video.php?video=' . urlencode('temp_uploads/' . $temp_filename)
+    'redirect' => 'video_details.php?video=' . urlencode($external_url)
 ]);
 
 $conn->close();

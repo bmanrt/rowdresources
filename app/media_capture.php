@@ -2,6 +2,15 @@
 session_start();
 require_once('auth_check.php');
 
+// Enable full error reporting
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
+// Log the included files and paths for debugging
+error_log("Script path: " . __FILE__);
+error_log("Include path: " . get_include_path());
+
 // Ensure user is authenticated
 if (!isAuthenticated()) {
     redirectToLogin();
@@ -18,19 +27,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['media'])) {
     $user_id = $currentUser['id'];
     
     // Server path configuration
-    $uploads_dir = "uploads";  // Directory name
-    $target_dir = dirname(dirname(__FILE__)) . "/" . $uploads_dir . "/";
-    $web_path = "/rowdresources/" . $uploads_dir . "/";
-    $base_url = "http://154.113.83.252";
-    $public_url = $base_url . $web_path;
-    
-    // Debug information
-    error_log("Target directory: " . $target_dir);
-    error_log("Public URL: " . $public_url);
+    $target_dir = "/var/www/html/rowdresources/uploads/";  // Absolute server path
+    $web_path = "/rowdresources/uploads/";  // Web accessible path
     
     // Create uploads directory if it doesn't exist
     if (!file_exists($target_dir)) {
-        mkdir($target_dir, 0777, true);
+        if (!@mkdir($target_dir, 0777, true)) {
+            error_log("Failed to create directory: " . $target_dir . ". Error: " . error_get_last()['message']);
+            die("Failed to create upload directory. Please check server permissions.");
+        }
     }
 
     // Generate a unique ID for the video
@@ -42,7 +47,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['media'])) {
     // Create filename and paths
     $filename = $video_id . "." . $file_extension;
     $target_file = $target_dir . $filename;
-    $public_file_url = $public_url . $filename;
+    $public_file_url = $web_path . $filename;
     
     // Debug upload path
     error_log("Attempting to upload to: " . $target_file);

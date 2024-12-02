@@ -27,10 +27,14 @@ foreach ($tags_data as $category => $tags) {
 $video_path = isset($_GET['video']) ? $_GET['video'] : '';
 $video_id = isset($_GET['video_id']) ? $_GET['video_id'] : '';
 
-if (empty($video_path) || empty($video_id)) {
+// For newly uploaded videos, we only have the video path
+if (empty($video_path)) {
     header("Location: index.php");
     exit();
 }
+
+// If video_id is not set, this is a new upload
+$is_new_upload = empty($video_id);
 ?>
 <!DOCTYPE html>
 <html lang="en">

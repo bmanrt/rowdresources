@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once('auth_check.php');
+require_once('db.php'); // Assuming your database connection is in db.php
 
 // Ensure user is authenticated
 if (!isAuthenticated()) {
@@ -8,16 +9,14 @@ if (!isAuthenticated()) {
     exit();
 }
 
-$video = $_GET['video'] ?? '';
 $video_id = $_GET['video_id'] ?? '';
 
-if (empty($video) || empty($video_id)) {
+if (empty($video_id)) {
     header("Location: index.php");
     exit();
 }
 
 // Debug logging
-error_log("Received video path: " . $video);
 error_log("Received video ID: " . $video_id);
 
 ?>
@@ -176,43 +175,72 @@ error_log("Received video ID: " . $video_id);
     <div class="details-container">
         <div class="details-header">
             <h1>Video Details</h1>
-            <p>Add information about your video</p>
         </div>
-        <form id="videoDetailsForm">
-            <input type="hidden" id="videoPath" value="<?php echo htmlspecialchars($video); ?>">
-            <input type="hidden" id="videoId" value="<?php echo htmlspecialchars($video_id); ?>">
+        
+        <?php
+        // Fetch video details from database
+        $stmt = $conn->prepare("SELECT * FROM user_media WHERE video_id = ? AND user_id = ?");
+        $stmt->bind_param("si", $video_id, $_SESSION['user_id']);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $video_data = $result->fetch_assoc();
+        
+        if (!$video_data) {
+            echo "<p>Video not found</p>";
+            exit;
+        }
+        
+        // Decode tags if they exist
+        $tags = [];
+        if (!empty($video_data['tags'])) {
+            $tags = json_decode($video_data['tags'], true) ?? [];
+        }
+        ?>
+        
+        <div class="video-player">
+            <video controls width="100%">
+                <source src="<?php echo htmlspecialchars($video_data['file_path']); ?>" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+        </div>
+
+        <form id="videoDetailsForm" class="details-form">
+            <input type="hidden" id="video_id" value="<?php echo htmlspecialchars($video_id); ?>">
+            <input type="hidden" id="videoPath" value="<?php echo htmlspecialchars($video_data['file_path']); ?>">
             
             <div class="form-group">
-                <label for="description"><i class="fas fa-align-left"></i> Description</label>
-                <textarea id="description" name="description" required></textarea>
+                <label for="description">Description</label>
+                <textarea id="description" name="description"><?php echo htmlspecialchars($video_data['description'] ?? ''); ?></textarea>
             </div>
             
             <div class="form-group">
-                <label for="category"><i class="fas fa-folder"></i> Category</label>
-                <select id="category" name="category" required>
-                    <option value="">Select a category</option>
-                    <option value="Penetrating with Languages">Penetrating with Languages</option>
-                    <option value="Say Yes to Kids">Say Yes to Kids</option>
-                    <option value="No One Left Behind">No One Left Behind</option>
-                    <option value="Teens Teevolution">Teens Teevolution</option>
-                    <option value="Youths Aglow">Youths Aglow</option>
-                    <option value="Every Minister An Outreach">Every Minister An Outreach</option>
-                    <option value="Digital">Digital</option>
-                    <option value="Dignitaries Distribution">Dignitaries Distribution</option>
-                    <option value="Strategic Distributions">Strategic Distributions</option>
+                <label for="category">Category</label>
+                <select id="category" name="category">
+                    <option value="">Select Category</option>
+                    <?php
+                    $categories = ['Training', 'Meeting', 'Presentation', 'Other'];
+                    foreach ($categories as $cat) {
+                        $selected = ($video_data['category'] ?? '') === $cat ? 'selected' : '';
+                        echo "<option value=\"" . htmlspecialchars($cat) . "\" $selected>" . htmlspecialchars($cat) . "</option>";
+                    }
+                    ?>
                 </select>
             </div>
             
             <div class="form-group">
-                <label for="tags"><i class="fas fa-tags"></i> Tags</label>
-                <select id="tags" name="tags[]" multiple="multiple" required>
-                    <!-- Tags will be loaded from data/tags.json -->
+                <label for="tags">Tags</label>
+                <select id="tags" name="tags[]" multiple class="tags-select">
+                    <?php
+                    if (!empty($tags)) {
+                        foreach ($tags as $tag) {
+                            echo "<option value=\"" . htmlspecialchars($tag) . "\" selected>" . htmlspecialchars($tag) . "</option>";
+                        }
+                    }
+                    ?>
                 </select>
             </div>
             
-            <button type="submit" class="btn-submit">
-                <i class="fas fa-save"></i> Save Details
-            </button>
+            <button type="submit" class="submit-btn">Save Details</button>
         </form>
     </div>
 
@@ -220,72 +248,54 @@ error_log("Received video ID: " . $video_id);
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script>
         $(document).ready(function() {
-            // Initialize Select2 for tags with custom data
-            const predefinedTags = {
-                "Vehicles": ["Planes", "Buses", "Trains"],
-                "Transport Terminals": ["Airports", "Bus Terminals", "Train Terminals"],
-                "Homes": ["Apartment Blocks", "Detached Houses", "Residential Estates", "Neighbourhoods"],
-                "Communities": ["The inner cities", "The Hinterlands", "Communities in crisis"],
-                "Hospitals": ["Teaching Hospitals", "Clinics", "Paediatric Hospitals"],
-                "Farms & Markets": [],
-                "Public Spaces": ["Parks", "Malls", "Shops"],
-                "Hospitality Businesses": ["Hotels", "Restaurants", "Event Centres"],
-                "Public Buildings": ["Government offices", "Courthouses", "Police stations"],
-                "Offices": ["Companies", "Factories"],
-                "Dangerous Jobs": ["Mines", "Offshore Rigs"],
-                "Military Bases": [],
-                "Iconic Landmarks/Tourist Attractions": [],
-                "People With Special Needs": ["Prisons", "Orphanages"]
-            };
-
-            // Flatten tags for Select2
-            let allTags = [];
-            Object.entries(predefinedTags).forEach(([category, tags]) => {
-                allTags.push(category);
-                if (tags.length > 0) {
-                    allTags = allTags.concat(tags);
-                }
-            });
-
+            // Initialize Select2 for tags
             $('#tags').select2({
                 tags: true,
                 tokenSeparators: [',', ' '],
                 placeholder: 'Add tags...',
-                theme: 'default',
-                data: allTags.map(tag => ({ id: tag, text: tag }))
+                allowClear: true
             });
 
             // Handle form submission
             $('#videoDetailsForm').on('submit', function(e) {
                 e.preventDefault();
                 
-                const data = {
+                const formData = {
+                    video_id: $('#video_id').val(),
                     videoPath: $('#videoPath').val(),
-                    video_id: $('#videoId').val(),
                     description: $('#description').val(),
                     category: $('#category').val(),
-                    tags: $('#tags').val()
+                    tags: $('#tags').val() || []
                 };
 
+                // Disable form while submitting
+                const submitBtn = $(this).find('button[type="submit"]');
+                submitBtn.prop('disabled', true).text('Saving...');
+
                 // Send data to server
-                fetch('save_video_details.php', {
+                $.ajax({
+                    url: 'save_video_details.php',
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
+                    contentType: 'application/json',
+                    data: JSON.stringify(formData),
+                    success: function(response) {
+                        const data = JSON.parse(response);
+                        if (data.success) {
+                            alert('Video details saved successfully!');
+                            // Optionally redirect to video list
+                            // window.location.href = 'index.php';
+                        } else {
+                            alert('Error: ' + (data.error || 'Unknown error occurred'));
+                        }
                     },
-                    body: JSON.stringify(data)
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        window.location.href = 'index.php';
-                    } else {
-                        alert('Error saving video details: ' + (data.error || 'Unknown error'));
+                    error: function(xhr, status, error) {
+                        console.error('Error:', error);
+                        alert('Error saving video details: ' + error);
+                    },
+                    complete: function() {
+                        // Re-enable form
+                        submitBtn.prop('disabled', false).text('Save Details');
                     }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('Error saving video details. Please try again.');
                 });
             });
         });

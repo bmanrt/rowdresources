@@ -36,7 +36,7 @@ if (!$video) {
 }
 
 // Format video path for frontend display
-$displayPath = '/rowd/' . ltrim($dbPath, '/');
+$displayPath = '/rowdresources/' . ltrim($dbPath, '/');
 ?>
 <!DOCTYPE html>
 <html lang="en">

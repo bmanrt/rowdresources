@@ -58,9 +58,9 @@ $file_extension = pathinfo($_FILES['media']['name'], PATHINFO_EXTENSION);
 $filename = $video_id . '.' . $file_extension;
 $upload_file = $upload_dir . DIRECTORY_SEPARATOR . $filename;
 
-// Attempt to move uploaded file
+// Attempt to save uploaded file directly
 if (!move_uploaded_file($_FILES['media']['tmp_name'], $upload_file)) {
-    error_log("Failed to move uploaded file to: " . $upload_file);
+    error_log("Failed to save uploaded file to: " . $upload_file);
     echo json_encode([
         'error' => 'File processing failed',
         'details' => 'Could not save uploaded file'

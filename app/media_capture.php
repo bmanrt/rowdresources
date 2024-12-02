@@ -13,7 +13,7 @@ $currentUser = getCurrentUser();
 
 // Handle file upload
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['media'])) {
-    require_once('../db_config.php');
+    require_once('http://154.113.83.252/rowdresources//db_config.php');
     
     $user_id = $currentUser['id'];
     $target_dir = "http://154.113.83.252/rowdresources/uploads/";
@@ -70,7 +70,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['media'])) {
             $stmt->bind_param("iss", $user_id, $target_file, $video_id);
             if ($stmt->execute()) {
                 // Redirect to video details page with the video ID
-                header("Location: video_details.php?video=" . urlencode($target_file) . "&video_id=" . urlencode($video_id));
+                header("Location: http://154.113.83.252/rowdresources/app/video_details.php?video=" . urlencode($target_file) . "&video_id=" . urlencode($video_id));
                 exit();
             }
             $stmt->close();

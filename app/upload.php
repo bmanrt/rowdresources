@@ -85,7 +85,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_FILES["media"])) {
         
         echo json_encode([
             "success" => true,
-            "redirect" => "video_details.php?video=" . urlencode($relative_path) . "&video_id=" . urlencode($video_id)
+            "redirect" => "/var/www/html/rowdresources/app/video_details.php?video=" . urlencode($relative_path) . "&video_id=" . urlencode($video_id)
         ]);
         
     } catch (Exception $e) {

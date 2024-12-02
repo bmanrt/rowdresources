@@ -71,18 +71,16 @@ if (!move_uploaded_file($_FILES['media']['tmp_name'], $temp_file)) {
 // Set proper file permissions
 chmod($temp_file, 0644);
 
-// File URL for external access
-$file_url = $upload_url . '/' . $temp_filename;
+// Generate video ID for the file
+$video_id = uniqid('vid_');
 
-// External URL path
-$external_url = $domain_path . '/uploads/' . $temp_filename;
-
-// Return success response with external URL
+// Return success response with correct paths
 echo json_encode([
     'success' => true,
-    'file' => $external_url,
-    'url' => $file_url,
-    'redirect' => 'video_details.php?video=' . urlencode($external_url)
+    'file' => $domain_path . '/temp_uploads/' . $temp_filename,
+    'url' => $domain_path . '/temp_uploads/' . $temp_filename,
+    'video_id' => $video_id,
+    'redirect' => 'video_details.php?video=' . urlencode($domain_path . '/temp_uploads/' . $temp_filename) . '&video_id=' . $video_id
 ]);
 
 $conn->close();

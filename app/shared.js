@@ -250,9 +250,14 @@ function openVideoModal(videoPath, description, category, date) {
     // Format paths for display and player
     const displayPath = videoPath;
     const dbPath = videoPath.includes('http://154.113.83.252/rowdresources/') 
-        ? videoPath.replace('http://154.113.83.252/rowdresources/', '')
+        ? videoPath.split('rowdresources/')[1]
         : videoPath;
     
+    console.log('Video paths:', {
+        displayPath,
+        dbPath
+    });
+
     // Update video source and action links
     source.src = displayPath;
     downloadBtn.href = displayPath;
@@ -264,8 +269,7 @@ function openVideoModal(videoPath, description, category, date) {
         window.videoPlayer = new Plyr('#player', {
             controls: [
                 'play-large', 'play', 'progress', 'current-time', 'duration',
-                'mute', 'volume', 'settings', 'pip', 'airplay', 'fullscreen',
-                'download'
+                'mute', 'volume', 'settings', 'pip', 'airplay', 'fullscreen'
             ],
             settings: ['quality', 'speed'],
             speed: { selected: 1, options: [0.5, 0.75, 1, 1.25, 1.5, 2] }

@@ -15,6 +15,7 @@ $currentUser = getCurrentUser();
 // Get video path from URL
 $videoPath = $_GET['video'] ?? '';
 if (empty($videoPath)) {
+    error_log("Player.php - No video path provided");
     header('Location: index.php');
     exit();
 }
@@ -42,6 +43,13 @@ if (!$video) {
 // Format video path for frontend display
 $displayPath = 'http://154.113.83.252/rowdresources/' . ltrim($dbPath, '/');
 error_log("Player.php - Display path: " . $displayPath);
+
+// Ensure the video file exists
+if (!file_exists('../' . $dbPath)) {
+    error_log("Player.php - Video file not found: " . '../' . $dbPath);
+    header('Location: index.php');
+    exit();
+}
 
 // Get video MIME type
 $file_extension = strtolower(pathinfo($displayPath, PATHINFO_EXTENSION));

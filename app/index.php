@@ -27,7 +27,7 @@ if ($categoriesResult) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Media Resource Portal</title>
+    <title>Media Repository</title>
     <link rel="stylesheet" href="styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -85,7 +85,6 @@ if ($categoriesResult) {
 </head>
 <body>
     <?php include('components/header.php'); ?>
-
     <main>
         <div class="hero-section">
             <div class="overlay"></div>
@@ -94,10 +93,9 @@ if ($categoriesResult) {
                 <p class="hero-description">Beyond reaching the whole world, over 7 billion people will be effectively discipled as they're engaged with Rhapsody of Realities in an accountable way.</p>
                 
                 <div class="cta-buttons">
-                    <button class="btn primary">
+                    <button class="btn primary" onclick="window.open('https://rhapsodytv.live/', '_blank')">
                         <i class="fas fa-tv"></i>
                         RhapsodyTV
-                        <span class="badge">2024</span>
                     </button>
                     <button class="btn secondary">
                         <i class="fas fa-play-circle"></i>
@@ -161,11 +159,6 @@ if ($categoriesResult) {
         </section>
     </template>
 
-    <!-- Upload Button Widget -->
-    <a href="upload.php" class="upload-btn-widget" title="Upload Video">
-        <i class="fas fa-plus"></i>
-    </a>
-
     <?php if (hasRole('admin')): ?>
     <!-- Admin Quick Actions -->
     <div class="admin-actions">
@@ -177,6 +170,11 @@ if ($categoriesResult) {
         </button>
     </div>
     <?php endif; ?>
+
+    <!-- Upload Button Widget -->
+    <a href="../media_capture.html" class="upload-btn-widget" title="Upload Video" target="_blank">
+        <i class="fas fa-plus"></i>
+    </a>
 
     <script src="script.js"></script>
     <script src="shared.js"></script>

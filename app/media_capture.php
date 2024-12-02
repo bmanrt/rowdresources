@@ -90,7 +90,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['media'])) {
             $stmt->bind_param("iss", $user_id, $public_file_url, $video_id);
             if ($stmt->execute()) {
                 // Redirect to video details page with the video ID
-                header("Location: video_details.php?video=" . urlencode($public_file_url) . "&video_id=" . urlencode($video_id));
+                $redirect_url = "/rowdresources/app/video_details.php?video=" . urlencode($public_file_url) . "&video_id=" . urlencode($video_id);
+                header("Location: " . $redirect_url);
                 exit();
             }
             $stmt->close();

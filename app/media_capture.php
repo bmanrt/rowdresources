@@ -16,7 +16,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['media'])) {
     require_once('../db_config.php');
     
     $user_id = $currentUser['id'];
-    $target_dir = "../uploads";
+    
+    // Remote server configuration
+    $remote_base_url = "http://154.113.83.252";
+    $target_dir = $_SERVER['DOCUMENT_ROOT'] . "/rowdresources/uploads/";
+    $public_url = $remote_base_url . "/rowdresources/uploads/";
     
     // Create uploads directory if it doesn't exist
     if (!file_exists($target_dir)) {
@@ -25,13 +29,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['media'])) {
 
     // Generate a unique ID for the video
     $video_id = uniqid('vid_');
-
+    
     // Get the file extension
     $file_extension = strtolower(pathinfo($_FILES["media"]["name"], PATHINFO_EXTENSION));
-
-    // Create a temporary filename with just the ID
-    $temp_filename = $video_id . "." . $file_extension;
-    $target_file = $target_dir . $temp_filename;
+    
+    // Create filename and paths
+    $filename = $video_id . "." . $file_extension;
+    $target_file = $target_dir . $filename;
+    $public_file_url = $public_url . $filename;
     $uploadOk = 1;
 
     // Check if file is a video
@@ -67,10 +72,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['media'])) {
 
             // Insert the initial record with the temporary filename
             $stmt = $conn->prepare("INSERT INTO user_media (user_id, file_path, media_type, video_id) VALUES (?, ?, 'video', ?)");
-            $stmt->bind_param("iss", $user_id, $target_file, $video_id);
+            $stmt->bind_param("iss", $user_id, $public_file_url, $video_id);
             if ($stmt->execute()) {
                 // Redirect to video details page with the video ID
-                header("Location: video_details.php?video=" . urlencode($target_file) . "&video_id=" . urlencode($video_id));
+                header("Location: video_details.php?video=" . urlencode($public_file_url) . "&video_id=" . urlencode($video_id));
                 exit();
             }
             $stmt->close();

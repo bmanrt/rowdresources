@@ -10,62 +10,82 @@ if (!isAuthenticated()) {
 }
 
 // Check if all required fields are present
-if (!isset($_POST['videoId'], $_POST['description'], $_POST['category'])) {
+if (!isset($_POST['videoId'], $_POST['description'], $_POST['category'], $_POST['video'])) {
     header('Content-Type: application/json');
     echo json_encode(['error' => 'Missing required fields']);
     exit;
 }
 
 $user_id = getCurrentUser()['id'];
-$video_id = $_POST['videoId'];
+$video_id = trim($_POST['videoId']);
 $description = trim($_POST['description']);
 $category = trim($_POST['category']);
-$tags = isset($_POST['tags']) ? implode(',', $_POST['tags']) : '';
+$tags = isset($_POST['tags']) ? json_encode($_POST['tags']) : '[]';
 
-// Define base paths and URLs
-$base_dir = dirname(__DIR__);
+// Clean up video path
+$video_path = trim($_POST['video']);
 $domain_path = "http://154.113.83.252/rowdresources";
-$video_path = $_POST['video'];
+$rowd_prefix = "/rowd/";
 
-// Remove domain path from video_path if it exists
+// Remove domain path and rowd prefix if they exist
 $video_path = str_replace($domain_path, '', $video_path);
+$video_path = str_replace($rowd_prefix, '', $video_path);
+$video_path = ltrim($video_path, '/');
 
-// The video should already be in the uploads directory
-$relative_permanent_path = $video_path;
+try {
+    // Start transaction
+    $conn->begin_transaction();
 
-// First, check if this video ID already exists
-$check_stmt = $conn->prepare("SELECT id FROM user_media WHERE video_id = ? AND user_id = ?");
-$check_stmt->bind_param("si", $video_id, $user_id);
-$check_stmt->execute();
-$check_result = $check_stmt->get_result();
+    // Check if video exists
+    $check_stmt = $conn->prepare("SELECT id FROM user_media WHERE video_id = ? AND user_id = ?");
+    $check_stmt->bind_param("si", $video_id, $user_id);
+    $check_stmt->execute();
+    $check_result = $check_stmt->get_result();
 
-if ($check_result->num_rows > 0) {
-    // Update existing record
-    $stmt = $conn->prepare("UPDATE user_media SET 
-        description = ?, 
-        category = ?, 
-        tags = ?,
-        status = 'completed'
-        WHERE video_id = ? AND user_id = ?");
-    $stmt->bind_param("ssssi", $description, $category, $tags, $video_id, $user_id);
-} else {
-    // Insert new record
-    $stmt = $conn->prepare("INSERT INTO user_media (user_id, video_id, description, category, tags, file_path, status) 
-        VALUES (?, ?, ?, ?, ?, ?, 'completed')");
-    $stmt->bind_param("isssss", $user_id, $video_id, $description, $category, $tags, $relative_permanent_path);
-}
+    if ($check_result->num_rows > 0) {
+        // Update existing record
+        $stmt = $conn->prepare("UPDATE user_media SET 
+            description = ?, 
+            category = ?, 
+            tags = ?
+            WHERE video_id = ? AND user_id = ?");
+        $stmt->bind_param("ssssi", $description, $category, $tags, $video_id, $user_id);
+    } else {
+        // Insert new record
+        $stmt = $conn->prepare("INSERT INTO user_media 
+            (user_id, video_id, description, category, tags, file_path, media_type) 
+            VALUES (?, ?, ?, ?, ?, ?, 'video')");
+        $stmt->bind_param("isssss", $user_id, $video_id, $description, $category, $tags, $video_path);
+    }
 
-if ($stmt->execute()) {
-    // Only set content type header for error responses
-    $redirect_url = 'player.php?video=' . urlencode($relative_permanent_path) . '&video_id=' . urlencode($video_id);
+    if (!$stmt->execute()) {
+        throw new Exception("Failed to save video details: " . $stmt->error);
+    }
+
+    // Commit transaction
+    $conn->commit();
+
+    // Redirect to player page
+    $redirect_url = 'player.php?video=' . urlencode($video_path);
     header('Location: ' . $redirect_url);
     exit;
-} else {
-    error_log("Database error: " . $stmt->error);
-    header('Content-Type: application/json');
-    echo json_encode(['error' => 'Failed to save video details']);
-}
 
-$check_stmt->close();
-$stmt->close();
-$conn->close();
+} catch (Exception $e) {
+    // Rollback transaction on error
+    $conn->rollback();
+    
+    error_log("Error in save_video_details.php: " . $e->getMessage());
+    header('Content-Type: application/json');
+    echo json_encode([
+        'error' => 'Failed to save video details',
+        'details' => $e->getMessage()
+    ]);
+    exit;
+
+} finally {
+    // Close all statements
+    if (isset($check_stmt)) $check_stmt->close();
+    if (isset($stmt)) $stmt->close();
+    $conn->close();
+}
+?>

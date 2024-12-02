@@ -4,23 +4,33 @@ require_once('auth_check.php');
 require_once('../db_config.php');
 
 if (!isAuthenticated()) {
-    header("Location: ../login.html");
+    header("Location: login.php");
     exit();
 }
 
 // Load categories and tags from JSON files
-$categories_json = file_get_contents('../data/categories.json');
-$tags_json = file_get_contents('../data/tags.json');
+try {
+    $categories_json = file_get_contents('../data/categories.json');
+    $tags_json = file_get_contents('../data/tags.json');
 
-$categories = json_decode($categories_json, true)['categories'];
-$tags_data = json_decode($tags_json, true)['tags'];
+    $categories = json_decode($categories_json, true)['categories'] ?? [];
+    $tags_data = json_decode($tags_json, true)['tags'] ?? [];
 
-// Flatten tags array
-$all_tags = [];
-foreach ($tags_data as $category => $tags) {
-    foreach ($tags as $tag) {
-        $all_tags[] = $tag;
+    if (empty($categories) || empty($tags_data)) {
+        throw new Exception("Failed to load categories or tags data");
     }
+
+    // Flatten tags array
+    $all_tags = [];
+    foreach ($tags_data as $category => $tags) {
+        foreach ($tags as $tag) {
+            $all_tags[] = $tag;
+        }
+    }
+} catch (Exception $e) {
+    error_log("Error loading JSON data: " . $e->getMessage());
+    $categories = [];
+    $all_tags = [];
 }
 
 // Get video information from URL parameters
@@ -35,6 +45,27 @@ if (empty($video_path)) {
 
 // If video_id is not set, this is a new upload
 $is_new_upload = empty($video_id);
+
+// Get existing video details if editing
+$existing_video = null;
+if (!$is_new_upload) {
+    $stmt = $conn->prepare("SELECT * FROM user_media WHERE video_id = ? AND user_id = ?");
+    $user_id = getCurrentUser()['id'];
+    $stmt->bind_param("si", $video_id, $user_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $existing_video = $result->fetch_assoc();
+    $stmt->close();
+}
+
+// Clean up video path for display
+$display_path = $video_path;
+if (!str_starts_with($display_path, '/')) {
+    $display_path = '/' . $display_path;
+}
+if (!str_starts_with($display_path, '/rowd/')) {
+    $display_path = '/rowd' . $display_path;
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -141,7 +172,7 @@ $is_new_upload = empty($video_id);
             transform: translateY(-2px);
         }
 
-        /* Select2 Custom Styling */
+        /* Select2 Dark Theme Customization */
         .select2-container--default .select2-selection--multiple {
             background-color: rgba(255, 255, 255, 0.05);
             border: 1px solid rgba(255, 255, 255, 0.2);
@@ -161,7 +192,7 @@ $is_new_upload = empty($video_id);
         }
 
         .select2-dropdown {
-            background-color: var(--background);
+            background-color: var(--dark-bg);
             border: 1px solid rgba(255, 255, 255, 0.2);
         }
 
@@ -177,6 +208,29 @@ $is_new_upload = empty($video_id);
         .select2-container--default .select2-search--inline .select2-search__field {
             color: var(--white);
         }
+
+        .select2-container--default .select2-selection--multiple .select2-selection__rendered {
+            padding: 0 8px;
+        }
+
+        .select2-container--default .select2-search--inline .select2-search__field::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        @media (max-width: 768px) {
+            .upload-container {
+                padding-left: 1rem;
+                padding-right: 1rem;
+            }
+
+            .upload-header h1 {
+                font-size: 2rem;
+            }
+
+            .upload-form {
+                padding: 1.5rem;
+            }
+        }
     </style>
 </head>
 <body>
@@ -184,13 +238,13 @@ $is_new_upload = empty($video_id);
     
     <div class="upload-container">
         <div class="upload-header">
-            <h1>Video Details</h1>
+            <h1><?php echo $is_new_upload ? 'Add Video Details' : 'Edit Video Details'; ?></h1>
         </div>
         
         <div class="upload-form">
             <div class="video-preview">
                 <video id="videoPreview" controls>
-                    <source src="../<?php echo htmlspecialchars($video_path); ?>" type="video/mp4">
+                    <source src="<?php echo htmlspecialchars($display_path); ?>" type="video/mp4">
                     Your browser does not support the video tag.
                 </video>
             </div>
@@ -201,7 +255,7 @@ $is_new_upload = empty($video_id);
                 
                 <div class="form-group">
                     <label for="description">Description:</label>
-                    <textarea id="description" name="description" rows="4" required></textarea>
+                    <textarea id="description" name="description" rows="4" required><?php echo htmlspecialchars($existing_video['description'] ?? ''); ?></textarea>
                 </div>
 
                 <div class="form-group">
@@ -209,7 +263,8 @@ $is_new_upload = empty($video_id);
                     <select id="category" name="category" required>
                         <option value="">Select a category</option>
                         <?php foreach($categories as $category): ?>
-                            <option value="<?php echo htmlspecialchars($category); ?>">
+                            <option value="<?php echo htmlspecialchars($category); ?>"
+                                <?php echo ($existing_video && $existing_video['category'] === $category) ? 'selected' : ''; ?>>
                                 <?php echo htmlspecialchars($category); ?>
                             </option>
                         <?php endforeach; ?>
@@ -219,8 +274,15 @@ $is_new_upload = empty($video_id);
                 <div class="form-group">
                     <label for="tags">Tags:</label>
                     <select id="tags" name="tags[]" multiple="multiple" required>
-                        <?php foreach($all_tags as $tag): ?>
-                            <option value="<?php echo htmlspecialchars($tag); ?>">
+                        <?php 
+                        $selected_tags = [];
+                        if ($existing_video && !empty($existing_video['tags'])) {
+                            $selected_tags = json_decode($existing_video['tags'], true) ?? [];
+                        }
+                        foreach($all_tags as $tag): 
+                        ?>
+                            <option value="<?php echo htmlspecialchars($tag); ?>"
+                                <?php echo in_array($tag, $selected_tags) ? 'selected' : ''; ?>>
                                 <?php echo htmlspecialchars($tag); ?>
                             </option>
                         <?php endforeach; ?>
@@ -228,7 +290,8 @@ $is_new_upload = empty($video_id);
                 </div>
 
                 <button type="submit" class="submit-btn">
-                    <i class="fas fa-save"></i> Save Details
+                    <i class="fas fa-save"></i> 
+                    <?php echo $is_new_upload ? 'Save Details' : 'Update Details'; ?>
                 </button>
             </form>
         </div>
@@ -238,10 +301,39 @@ $is_new_upload = empty($video_id);
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script>
         $(document).ready(function() {
+            // Initialize Select2
             $('#tags').select2({
                 placeholder: 'Select tags',
                 allowClear: true,
-                theme: 'default'
+                theme: 'default',
+                width: '100%'
+            });
+
+            // Form validation
+            $('#videoDetailsForm').on('submit', function(e) {
+                const description = $('#description').val().trim();
+                const category = $('#category').val();
+                const tags = $('#tags').val();
+
+                if (!description) {
+                    e.preventDefault();
+                    alert('Please enter a description');
+                    return false;
+                }
+
+                if (!category) {
+                    e.preventDefault();
+                    alert('Please select a category');
+                    return false;
+                }
+
+                if (!tags || tags.length === 0) {
+                    e.preventDefault();
+                    alert('Please select at least one tag');
+                    return false;
+                }
+
+                return true;
             });
         });
     </script>

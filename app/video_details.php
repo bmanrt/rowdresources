@@ -77,12 +77,11 @@ $display_path = $video_path;
 if (!str_starts_with($display_path, '/')) {
     $display_path = '/' . $display_path;
 }
+if (!str_starts_with($display_path, '/rowd/')) {
+    $display_path = '/rowd/' . ltrim($display_path, '/');
+}
 
-// Build the full video URL for remote server
-$video_url = "http://154.113.83.252/rowdresources/uploads/videos" . basename($display_path);
-
-error_log("Original path: " . $video_path);
-error_log("Final video URL: " . $video_url);
+error_log("Final display_path: " . $display_path);
 
 // Determine video MIME type
 $file_extension = strtolower(pathinfo($display_path, PATHINFO_EXTENSION));
@@ -155,7 +154,10 @@ if (!file_exists($physical_path)) {
         <div class="upload-form">
             <div class="video-preview">
                 <video id="videoPreview" controls preload="metadata" controlsList="nodownload">
-                    <source src="<?php echo htmlspecialchars($video_url); ?>" type="<?php echo $video_mime_type; ?>">
+                    <source src="<?php echo htmlspecialchars($display_path); ?>" type="<?php echo $video_mime_type; ?>">
+                    <source src="<?php echo htmlspecialchars($display_path); ?>" type="video/mp4">
+                    <source src="<?php echo htmlspecialchars($display_path); ?>" type="video/webm">
+                    <source src="<?php echo htmlspecialchars($display_path); ?>" type="video/ogg">
                     Your browser does not support the video tag.
                 </video>
             </div>
@@ -224,8 +226,18 @@ if (!file_exists($physical_path)) {
             const video = document.getElementById('videoPreview');
             video.addEventListener('error', function(e) {
                 console.error('Video error:', e);
-                console.log('Video URL:', video.querySelector('source').src);
+                console.log('Video source:', video.querySelector('source').src);
                 console.log('Video type:', video.querySelector('source').type);
+                // Try alternative video types
+                const sources = video.getElementsByTagName('source');
+                let currentSource = 0;
+                video.addEventListener('error', function(e) {
+                    currentSource++;
+                    if (currentSource < sources.length) {
+                        video.src = sources[currentSource].src;
+                        video.load();
+                    }
+                });
             });
 
             // Log when video starts playing

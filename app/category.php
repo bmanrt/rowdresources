@@ -28,8 +28,7 @@ if ($categoriesResult) {
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <?php include('components/head_common.php'); ?>
     <title><?php echo $category ? htmlspecialchars($category) : 'All Categories'; ?> - Videos</title>
     <link rel="stylesheet" href="styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">

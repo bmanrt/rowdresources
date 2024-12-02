@@ -1,4 +1,6 @@
 <?php
+require_once(__DIR__ . '/../auth_check.php');
+
 // Get current user data if not already available
 if (!isset($currentUser)) {
     $currentUser = getCurrentUser();

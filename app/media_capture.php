@@ -78,11 +78,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['media'])) {
         echo "Sorry, your file was not uploaded.";
     } else {
         if (move_uploaded_file($_FILES["media"]["tmp_name"], $target_file)) {
-            // Add video_id column if it doesn't exist
-            $alter_query = "ALTER TABLE user_media ADD COLUMN IF NOT EXISTS video_id VARCHAR(255)";
-            if (!$conn->query($alter_query)) {
-                echo "Error adding video_id column: " . $conn->error;
-                exit;
+            // Check if video_id column exists
+            $check_column = "SHOW COLUMNS FROM user_media LIKE 'video_id'";
+            $column_exists = $conn->query($check_column)->num_rows > 0;
+            
+            if (!$column_exists) {
+                // Add video_id column if it doesn't exist
+                $alter_query = "ALTER TABLE user_media ADD COLUMN video_id VARCHAR(255)";
+                try {
+                    $conn->query($alter_query);
+                } catch (Exception $e) {
+                    error_log("Error adding column: " . $e->getMessage());
+                }
             }
 
             // Insert the initial record with the temporary filename

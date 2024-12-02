@@ -16,9 +16,8 @@ if (!isAuthenticated()) {
 
 $user_id = getCurrentUser()['id'];
 $temp_dir = "../temp_uploads/";
-$target_dir = "../uploads/";
 
-// Create directories if they don't exist
+// Create temp directory if it doesn't exist
 if (!file_exists($temp_dir)) {
     if (!mkdir($temp_dir, 0777, true)) {
         error_log("Failed to create temp directory: " . error_get_last()['message']);
@@ -26,14 +25,6 @@ if (!file_exists($temp_dir)) {
         exit;
     }
     chmod($temp_dir, 0777);
-}
-if (!file_exists($target_dir)) {
-    if (!mkdir($target_dir, 0777, true)) {
-        error_log("Failed to create uploads directory: " . error_get_last()['message']);
-        echo json_encode(['error' => 'Failed to create uploads directory']);
-        exit;
-    }
-    chmod($target_dir, 0777);
 }
 
 // Check if file was uploaded
@@ -107,7 +98,7 @@ if (move_uploaded_file($_FILES["media"]["tmp_name"], $temp_file)) {
 
     // Insert the initial record with the temporary filename and pending status
     $stmt = $conn->prepare("INSERT INTO user_media (user_id, file_path, media_type, video_id, status) VALUES (?, ?, 'video', ?, 'pending')");
-    $relative_path = str_replace('../', '', $temp_file);
+    $relative_path = "temp_uploads/" . $temp_filename;
     $stmt->bind_param("iss", $user_id, $relative_path, $video_id);
     
     if ($stmt->execute()) {
@@ -124,7 +115,7 @@ if (move_uploaded_file($_FILES["media"]["tmp_name"], $temp_file)) {
 } else {
     $php_error = error_get_last();
     error_log("Move uploaded file failed: " . ($php_error ? $php_error['message'] : 'Unknown error'));
-    echo json_encode(['error' => 'Failed to upload file. Please try again. Error: ' . ($php_error ? $php_error['message'] : 'Unknown error')]);
+    echo json_encode(['error' => 'Failed to upload file. Please try again.']);
 }
 
 $conn->close();

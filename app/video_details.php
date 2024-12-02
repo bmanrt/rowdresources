@@ -22,8 +22,16 @@ foreach ($tags_data as $category => $tags) {
         $all_tags[] = $tag;
     }
 }
-?>
 
+// Get video information from URL parameters
+$video_path = isset($_GET['video']) ? $_GET['video'] : '';
+$video_id = isset($_GET['video_id']) ? $_GET['video_id'] : '';
+
+if (empty($video_path) || empty($video_id)) {
+    header("Location: ../dashboard.php");
+    exit();
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -178,14 +186,14 @@ foreach ($tags_data as $category => $tags) {
         <div class="upload-form">
             <div class="video-preview">
                 <video id="videoPreview" controls>
-                    <source src="" type="video/mp4">
+                    <source src="../<?php echo htmlspecialchars($video_path); ?>" type="video/mp4">
                     Your browser does not support the video tag.
                 </video>
             </div>
 
-            <form id="videoDetailsForm">
-                <input type="hidden" id="videoPath" name="videoPath">
-                <input type="hidden" id="videoId" name="videoId">
+            <form id="videoDetailsForm" action="save_video_details.php" method="POST">
+                <input type="hidden" name="video" value="<?php echo htmlspecialchars($video_path); ?>">
+                <input type="hidden" name="videoId" value="<?php echo htmlspecialchars($video_id); ?>">
                 
                 <div class="form-group">
                     <label for="description">Description:</label>
@@ -225,55 +233,12 @@ foreach ($tags_data as $category => $tags) {
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script>
-        // Get video path and ID from URL parameters
-        const urlParams = new URLSearchParams(window.location.search);
-        const videoPath = urlParams.get('video');
-        const videoId = urlParams.get('video_id');
-        
-        if (!videoPath || !videoId) {
-            alert('Video information is missing');
-            window.location.href = '../dashboard.html';
-        }
-        
-        // Set video preview source
-        const videoPreview = document.getElementById('videoPreview');
-        videoPreview.src = '../' + videoPath;
-        
-        document.getElementById('videoPath').value = videoPath;
-        document.getElementById('videoId').value = videoId;
-
-        // Initialize Select2 for tags
         $(document).ready(function() {
             $('#tags').select2({
                 placeholder: 'Select tags',
                 allowClear: true,
                 theme: 'default'
             });
-        });
-
-        // Handle form submission
-        document.getElementById('videoDetailsForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const formData = new FormData(this);
-            formData.append('video', videoPath);
-            formData.append('video_id', videoId);
-            
-            // Submit form directly to allow PHP redirect
-            const form = document.createElement('form');
-            form.method = 'POST';
-            form.action = 'save_video_details.php';
-            
-            for (const [key, value] of formData.entries()) {
-                const input = document.createElement('input');
-                input.type = 'hidden';
-                input.name = key;
-                input.value = value;
-                form.appendChild(input);
-            }
-            
-            document.body.appendChild(form);
-            form.submit();
         });
     </script>
 </body>

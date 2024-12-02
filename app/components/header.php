@@ -8,8 +8,8 @@ if (!isset($currentUser)) {
 ?>
 <header class="header">
     <nav class="nav">
-        <a href="index.php" class="nav-brand">
-            <img src="assets/images/logo.webp" alt="Logo">
+        <a href="../app/index.php" class="nav-brand">
+            <img src="../app/assets/images/logo.webp" alt="Logo">
         </a>
         
         <button class="mobile-menu-toggle" aria-label="Toggle menu" id="mobileMenuToggle">
@@ -17,7 +17,7 @@ if (!isset($currentUser)) {
         </button>
 
         <div class="nav-links" id="navLinks">
-            <a href="index.php" class="nav-link <?php echo basename($_SERVER['PHP_SELF']) === 'index.php' ? 'active' : ''; ?>">
+            <a href="../app/index.php" class="nav-link <?php echo basename($_SERVER['PHP_SELF']) === 'index.php' ? 'active' : ''; ?>">
                 <i class="fas fa-home"></i>
                 <span>Home</span>
             </a>
@@ -29,12 +29,12 @@ if (!isset($currentUser)) {
                     <i class="fas fa-chevron-down"></i>
                 </div>
                 <div class="dropdown-menu" id="categoriesDropdown">
-                    <a href="category.php" class="dropdown-item">
+                    <a href="../app/category.php" class="dropdown-item">
                         <i class="fas fa-layer-group"></i>
                         All Categories
                     </a>
                     <?php foreach ($categories as $cat): ?>
-                    <a href="category.php?category=<?php echo urlencode($cat); ?>" class="dropdown-item">
+                    <a href="../app/category.php?category=<?php echo urlencode($cat); ?>" class="dropdown-item">
                         <i class="fas fa-folder"></i>
                         <?php echo htmlspecialchars($cat); ?>
                     </a>
@@ -55,7 +55,7 @@ if (!isset($currentUser)) {
                 </div>
             </div>
 
-            <a href="search.php" class="nav-link <?php echo basename($_SERVER['PHP_SELF']) === 'search.php' ? 'active' : ''; ?>">
+            <a href="../app/search.php" class="nav-link <?php echo basename($_SERVER['PHP_SELF']) === 'search.php' ? 'active' : ''; ?>">
                 <i class="fas fa-search"></i>
                 <span>Search</span>
             </a>
@@ -68,17 +68,17 @@ if (!isset($currentUser)) {
                     <i class="fas fa-chevron-down"></i>
                 </div>
                 <div class="dropdown-menu">
-                    <a href="profile.php" class="dropdown-item <?php echo basename($_SERVER['PHP_SELF']) === 'profile.php' ? 'active' : ''; ?>">
+                    <a href="../app/profile.php" class="dropdown-item <?php echo basename($_SERVER['PHP_SELF']) === 'profile.php' ? 'active' : ''; ?>">
                         <i class="fas fa-user-circle"></i>
                         Profile
                     </a>
                     <?php if (hasRole('admin')): ?>
-                    <a href="admin/dashboard.php" class="dropdown-item">
+                    <a href="../app/admin/dashboard.php" class="dropdown-item">
                         <i class="fas fa-cog"></i>
                         Admin Panel
                     </a>
                     <?php endif; ?>
-                    <a href="logout.php" class="dropdown-item">
+                    <a href="../app/logout.php" class="dropdown-item">
                         <i class="fas fa-sign-out-alt"></i>
                         Logout
                     </a>
@@ -87,4 +87,4 @@ if (!isset($currentUser)) {
         </div>
     </nav>
 </header>
-<?php include('components/header-scripts.php'); ?>
+<?php include(__DIR__ . '/header-scripts.php'); ?>

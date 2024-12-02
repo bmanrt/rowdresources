@@ -17,10 +17,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['media'])) {
     
     $user_id = $currentUser['id'];
     
-    // Remote server configuration
-    $remote_base_url = "http://154.113.83.252";
-    $target_dir = $_SERVER['DOCUMENT_ROOT'] . "/rowdresources/uploads/";
-    $public_url = $remote_base_url . "/rowdresources/uploads/";
+    // Server path configuration
+    $uploads_dir = "uploads";  // Directory name
+    $target_dir = dirname(dirname(__FILE__)) . "/" . $uploads_dir . "/";
+    $web_path = "/rowdresources/" . $uploads_dir . "/";
+    $base_url = "http://154.113.83.252";
+    $public_url = $base_url . $web_path;
+    
+    // Debug information
+    error_log("Target directory: " . $target_dir);
+    error_log("Public URL: " . $public_url);
     
     // Create uploads directory if it doesn't exist
     if (!file_exists($target_dir)) {
@@ -37,6 +43,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['media'])) {
     $filename = $video_id . "." . $file_extension;
     $target_file = $target_dir . $filename;
     $public_file_url = $public_url . $filename;
+    
+    // Debug upload path
+    error_log("Attempting to upload to: " . $target_file);
+    
     $uploadOk = 1;
 
     // Check if file is a video

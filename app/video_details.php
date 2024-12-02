@@ -15,6 +15,11 @@ if (empty($video) || empty($video_id)) {
     header("Location: index.php");
     exit();
 }
+
+// Debug logging
+error_log("Received video path: " . $video);
+error_log("Received video ID: " . $video_id);
+
 ?>
 <!DOCTYPE html>
 <html lang="en">

@@ -61,9 +61,28 @@ try {
     $new_path = $uploads_dir . $new_filename;
     $public_url = "/rowdresources/uploads/" . $new_filename;
 
-    // Rename the file
+    // Debug logging
+    error_log("Current file path: " . $current_file);
+    error_log("New file path: " . $new_path);
+    error_log("Original video path: " . $videoPath);
+    
+    // Check if source file exists
+    if (!file_exists($current_file)) {
+        error_log("Source file does not exist: " . $current_file);
+        throw new Exception("Source video file not found");
+    }
+    
+    // Check directory permissions
+    if (!is_writable($uploads_dir)) {
+        error_log("Upload directory is not writable: " . $uploads_dir);
+        throw new Exception("Upload directory is not writable");
+    }
+
+    // Try to rename the file
     if (!rename($current_file, $new_path)) {
-        throw new Exception("Error renaming video file");
+        $error = error_get_last();
+        error_log("Rename error details: " . print_r($error, true));
+        throw new Exception("Error renaming video file: " . ($error['message'] ?? 'Unknown error'));
     }
 
     // Update the video details in database

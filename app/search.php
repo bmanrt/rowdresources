@@ -34,6 +34,69 @@ if ($categoriesResult) {
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css" />
+    <style>
+        .filter-checkbox {
+            display: inline-flex;
+            align-items: center;
+            margin-right: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            user-select: none;
+        }
+
+        .filter-checkbox input[type="checkbox"] {
+            position: absolute;
+            opacity: 0;
+            cursor: pointer;
+            height: 0;
+            width: 0;
+        }
+
+        .filter-checkbox span {
+            position: relative;
+            padding-left: 28px;
+            color: #333;
+        }
+
+        .filter-checkbox span:before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 18px;
+            height: 18px;
+            border: 2px solid #4a90e2;
+            border-radius: 4px;
+            background-color: white;
+            transition: all 0.2s ease;
+        }
+
+        .filter-checkbox input[type="checkbox"]:checked + span:before {
+            background-color: #4a90e2;
+            border-color: #4a90e2;
+        }
+
+        .filter-checkbox input[type="checkbox"]:checked + span:after {
+            content: '';
+            position: absolute;
+            left: 6px;
+            top: 50%;
+            transform: translateY(-50%) rotate(45deg);
+            width: 5px;
+            height: 10px;
+            border: solid white;
+            border-width: 0 2px 2px 0;
+        }
+
+        .filter-checkbox:hover span:before {
+            border-color: #357abd;
+        }
+
+        .search-filters {
+            margin-top: 15px;
+        }
+    </style>
 </head>
 <body>
     <?php include('components/header.php'); ?>

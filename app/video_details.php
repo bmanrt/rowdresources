@@ -166,7 +166,7 @@ error_log("File readable check: " . (is_readable($physical_path) ? 'true' : 'fal
             padding: 0.75rem;
             border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 8px;
-            background: rgba(0, 0, 0, 0.2);
+            background: #000;
             color: var(--white);
             font-size: 0.9rem;
             transition: all 0.3s ease;
@@ -183,6 +183,16 @@ error_log("File readable check: " . (is_readable($physical_path) ? 'true' : 'fal
             background-repeat: no-repeat;
             background-position: calc(100% - 1rem) center;
             padding-right: 2.5rem;
+        }
+
+        select option {
+            background-color: #000;
+            color: white;
+        }
+
+        select:focus {
+            outline: none;
+            border-color: rgba(255, 255, 255, 0.2);
         }
 
         .select2-container--default .select2-selection--multiple {

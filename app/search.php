@@ -55,7 +55,7 @@ if ($categoriesResult) {
         .filter-checkbox span {
             position: relative;
             padding-left: 28px;
-            color: #333;
+            color: white;
         }
 
         .filter-checkbox span:before {

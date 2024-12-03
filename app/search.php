@@ -42,6 +42,7 @@ if ($categoriesResult) {
             cursor: pointer;
             font-size: 14px;
             user-select: none;
+            color: white;
         }
 
         .filter-checkbox input[type="checkbox"] {

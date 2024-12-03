@@ -70,7 +70,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $mail->addAddress($email);
 
                     // Content
-                    $reset_link = "http://{$_SERVER['HTTP_HOST']}/rowd/app/reset_password.php?token=" . $token;
+                    $reset_link = "http://{$_SERVER['HTTP_HOST']}/rowdresources/app/reset_password.php?token=" . $token;
                     $mail->isHTML(true);
                     $mail->Subject = 'Password Reset Request';
                     $mail->Body = "Hello {$user['username']},<br><br>";

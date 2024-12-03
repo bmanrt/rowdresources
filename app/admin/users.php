@@ -313,8 +313,30 @@ if (!$stmt) {
         }
 
         function deleteUser(userId) {
-            // TODO: Implement delete user functionality
-            alert('Delete user functionality coming soon');
+            if (!confirm('Are you sure you want to delete this user?')) {
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('user_id', userId);
+
+            fetch('delete_user.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message);
+                    window.location.reload();
+                } else {
+                    alert(data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while deleting the user');
+            });
         }
     </script>
 </body>

@@ -91,7 +91,7 @@ if ($categoriesResult) {
             <div class="overlay"></div>
             <div class="hero-content">
                 <h1 class="animate-text">ReachOut World Day Media Repository</h1>
-                <p class="hero-description">“How beautiful on the mountains are the feet of those who bring good news...” Isaiah 52:7"</p>
+                <p class="hero-description">“How beautiful on the mountains are the feet of those who bring good news...” Isaiah 52:7</p>
                 
                 <div class="cta-buttons">
                     <button class="btn primary" onclick="window.open('https://rhapsodytv.live/', '_blank')">

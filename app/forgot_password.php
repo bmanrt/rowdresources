@@ -66,21 +66,49 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $mail->Timeout = 30;
 
                     // Recipients
-                    $mail->setFrom('odunoyemayowa@gmail.com', 'Media Resource Portal');
+                    $mail->setFrom('odunoyemayowa@gmail.com', 'Reachout World Day Media Repository');
                     $mail->addAddress($email);
 
                     // Content
                     $reset_link = "http://{$_SERVER['HTTP_HOST']}/rowdresources/app/reset_password.php?token=" . $token;
                     $mail->isHTML(true);
-                    $mail->Subject = 'Password Reset Request';
-                    $mail->Body = "Hello {$user['username']},<br><br>";
-                    $mail->Body .= "You have requested to reset your password. Click the link below to reset it:<br><br>";
-                    $mail->Body .= "<a href='$reset_link'>$reset_link</a><br><br>";
-                    $mail->Body .= "This link will expire in 1 hour.<br><br>";
-                    $mail->Body .= "If you did not request this reset, please ignore this email.<br><br>";
-                    $mail->Body .= "Best regards,<br>Media Resource Portal Team";
-                    $mail->AltBody = strip_tags(str_replace('<br>', "\n", $mail->Body));
+                    $mail->Subject = 'Reachout World Day Media Repository - Password Reset Request';
+                    
+                    // Create a nicely formatted HTML email
+                    $mail->Body = "
+                    <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9f9f9;'>
+                        <div style='text-align: center; margin-bottom: 30px;'>
+                            <img src='http://{$_SERVER['HTTP_HOST']}/rowdresources/app/assets/images/logo.webp' alt='Reachout World Day Logo' style='max-width: 200px;'>
+                        </div>
+                        
+                        <div style='background-color: #ffffff; padding: 30px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);'>
+                            <h2 style='color: #333; margin-bottom: 20px; text-align: center;'>Password Reset Request</h2>
+                            
+                            <p style='color: #666; font-size: 16px; line-height: 1.5; margin-bottom: 20px;'>Hello {$user['username']},</p>
+                            
+                            <p style='color: #666; font-size: 16px; line-height: 1.5; margin-bottom: 20px;'>We received a request to reset your password for your Reachout World Day Media Repository account. Click the button below to reset it:</p>
+                            
+                            <div style='text-align: center; margin: 30px 0;'>
+                                <a href='$reset_link' style='display: inline-block; background-color: #ffcc00; color: #333; text-decoration: none; padding: 12px 30px; border-radius: 5px; font-weight: bold;'>Reset Password</a>
+                            </div>
+                            
+                            <p style='color: #666; font-size: 14px; margin-bottom: 10px;'>This link will expire in 1 hour for security reasons.</p>
+                            
+                            <p style='color: #666; font-size: 14px; margin-bottom: 20px;'>If you did not request this reset, please ignore this email or contact support if you have concerns.</p>
+                            
+                            <hr style='border: none; border-top: 1px solid #eee; margin: 30px 0;'>
+                            
+                            <p style='color: #999; font-size: 12px; text-align: center;'>Reachout World Day Media Repository<br>Your trusted platform for media resources</p>
+                        </div>
+                    </div>";
 
+                    // Plain text version for email clients that don't support HTML
+                    $mail->AltBody = "Hello {$user['username']},\n\n" .
+                                   "You have requested to reset your password for your Reachout World Day Media Repository account. Click the link below to reset it:\n\n" .
+                                   "$reset_link\n\n" .
+                                   "This link will expire in 1 hour for security reasons.\n\n" .
+                                   "If you did not request this reset, please ignore this email or contact support if you have concerns.\n\n" .
+                                   "Best regards,\nReachout World Day Team";
                     $mail->send();
                     $success = 'Password reset instructions have been sent to your email';
                 } catch (Exception $e) {
@@ -102,7 +130,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <html lang="en">
 <head>
     <?php include('components/head_common.php'); ?>
-    <title>Forgot Password - Media Resource Portal</title>
+    <title>Forgot Password - Reachout World Day Media Repository</title>
 </head>
 <body>
    

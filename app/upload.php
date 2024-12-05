@@ -255,7 +255,7 @@ $currentUser = getCurrentUser();
                 <i class="fas fa-cloud-upload-alt upload-icon"></i>
                 <div class="upload-text">
                     <p>Drag and drop your video here or click to browse</p>
-                    <small>Maximum file size: 500MB</small>
+                    <small>Maximum file size: 1024MB</small>
                 </div>
                 <input type="file" id="media" name="media" accept="video/mp4,video/webm,video/ogg" required 
                        aria-label="Choose a video file">
@@ -283,7 +283,7 @@ $currentUser = getCurrentUser();
 
             <div class="supported-formats">
                 <h3>Supported Formats</h3>
-                <p>MP4, WebM, OGG (Maximum file size: 50MB)</p>
+                <p>MP4, WebM, OGG (Maximum file size: 1024MB)</p>
             </div>
         </form>
     </div>

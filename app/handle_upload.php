@@ -50,13 +50,13 @@ if (!in_array($file_type, $allowed_types)) {
     exit;
 }
 
-// Validate file size (500MB max)
-$max_size = 500 * 1024 * 1024; // 50MB in bytes
+// Validate file size (1024MB max)
+$max_size = 1024 * 1024 * 1024; // 1GB in bytes
 if ($_FILES['media']['size'] > $max_size) {
     error_log("File too large: " . $_FILES['media']['size'] . " bytes");
     echo json_encode([
         'error' => 'File too large',
-        'details' => 'Maximum file size is 500MB'
+        'details' => 'Maximum file size is 1024MB'
     ]);
     exit;
 }

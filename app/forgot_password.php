@@ -48,10 +48,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     // Server settings
                     $mail->SMTPDebug = SMTP::DEBUG_OFF; // Debug disabled
                     $mail->isSMTP();
-                    $mail->Host = 'mail.lwpl.org';
+                    $mail->Host = 'smtp.gmail.com';
                     $mail->SMTPAuth = true;
-                    $mail->Username = 'webadmin@lwpl.org';
-                    $mail->Password = 'Newuser2024$';
+                    $mail->Username = 'odunoyemayowa@gmail.com';
+                    $mail->Password = 'mzxx jpxx wajn xbun';
                     $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
                     $mail->Port = 465;
                     
@@ -69,6 +69,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     // Recipients
                     $mail->setFrom('webadmin@lwpl.org', 'Reachout World Day Media Repository');
                     $mail->addAddress($email);
+                    $mail->addReplyTo('webadmin@lwpl.org', 'Reachout World Day Media Repository');
 
                     // Content
                     $reset_link = "http://{$_SERVER['HTTP_HOST']}/rowdresources/app/reset_password.php?token=" . $token;

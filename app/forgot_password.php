@@ -46,14 +46,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $mail = new PHPMailer(true);
                 try {
                     // Server settings
-                    $mail->SMTPDebug = SMTP::DEBUG_SERVER; // Keep debug output for testing
+                    $mail->SMTPDebug = SMTP::DEBUG_OFF; // Debug disabled
                     $mail->isSMTP();
                     $mail->Host = 'mail.lwpl.org';
                     $mail->SMTPAuth = true;
                     $mail->Username = 'webadmin@lwpl.org';
                     $mail->Password = 'Newuser2024$';
-                    $mail->SMTPSecure = '';  // No encryption
-                    $mail->Port = 25; // Standard SMTP port
+                    $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
+                    $mail->Port = 465;
                     
                     // Additional SMTP settings
                     $mail->SMTPOptions = array(
@@ -63,7 +63,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             'allow_self_signed' => true
                         )
                     );
-                    $mail->Timeout = 120;
+                    $mail->Timeout = 30;
                     $mail->SMTPKeepAlive = true;
 
                     // Recipients

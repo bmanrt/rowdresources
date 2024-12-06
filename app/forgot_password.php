@@ -46,14 +46,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $mail = new PHPMailer(true);
                 try {
                     // Server settings
-                    $mail->SMTPDebug = SMTP::DEBUG_OFF; // Disable debug output
+                    $mail->SMTPDebug = SMTP::DEBUG_SERVER; // Enable debug output temporarily
                     $mail->isSMTP();
                     $mail->Host = 'mail.lwpl.org';
                     $mail->SMTPAuth = true;
                     $mail->Username = 'webadmin@lwpl.org';
                     $mail->Password = 'Newuser2024$';
                     $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
-                    $mail->Port = 465;
+                    $mail->Port = 465; // SMTP port for secure SSL/TLS
                     
                     // Additional SMTP settings
                     $mail->SMTPOptions = array(
@@ -63,7 +63,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             'allow_self_signed' => true
                         )
                     );
-                    $mail->Timeout = 30;
+                    $mail->Timeout = 60; // Increased timeout
+                    $mail->SMTPKeepAlive = true; // Keep the connection alive
 
                     // Recipients
                     $mail->setFrom('webadmin@lwpl.org', 'Reachout World Day Media Repository');

@@ -52,8 +52,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $mail->SMTPAuth = true;
                     $mail->Username = 'webadmin@lwpl.org';
                     $mail->Password = 'Newuser2024$';
-                    $mail->SMTPSecure = 'ssl';
-                    $mail->Port = 993; // Using IMAP SSL port as per manual settings
+                    $mail->SMTPSecure = '';  // No encryption
+                    $mail->Port = 25; // Standard SMTP port
                     
                     // Additional SMTP settings
                     $mail->SMTPOptions = array(
@@ -63,7 +63,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             'allow_self_signed' => true
                         )
                     );
-                    $mail->Timeout = 60;
+                    $mail->Timeout = 120;
                     $mail->SMTPKeepAlive = true;
 
                     // Recipients

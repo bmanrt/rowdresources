@@ -48,10 +48,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     // Server settings
                     $mail->SMTPDebug = SMTP::DEBUG_SERVER; // Enable debug output temporarily
                     $mail->isSMTP();
-                    $mail->Host = 'mail.lwpl.org';
+                    $mail->Host = 'smtp.gmail.com';
                     $mail->SMTPAuth = true;
-                    $mail->Username = 'webadmin@lwpl.org';
-                    $mail->Password = 'Newuser2024$';
+                    $mail->Username = 'odunoyemayowa@gmail.com';
+                    $mail->Password = 'mzxx jpxx wajn xbun';
                     $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
                     $mail->Port = 465; // SMTP port for secure SSL/TLS
                     
@@ -67,7 +67,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $mail->SMTPKeepAlive = true; // Keep the connection alive
 
                     // Recipients
-                    $mail->setFrom('webadmin@lwpl.org', 'Reachout World Day Media Repository');
+                    $mail->setFrom('odunoyemayowa@gmail.com', 'Reachout World Day Media Repository');
                     $mail->addAddress($email);
 
                     // Content
